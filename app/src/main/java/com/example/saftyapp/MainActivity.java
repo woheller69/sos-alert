@@ -538,6 +538,15 @@ public class MainActivity extends AppCompatActivity implements EmergencyService.
                 pickContact();
             }
         });
+
+        // About SOS Alerter button click listener
+        View cardAboutApp = findViewById(R.id.cardAboutApp);
+        if (cardAboutApp != null) {
+            cardAboutApp.setOnClickListener(v -> {
+                Intent intent = new Intent(MainActivity.this, AboutActivity.class);
+                startActivity(intent);
+            });
+        }
     }
 
     @Override
