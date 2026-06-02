@@ -38,9 +38,11 @@ import android.telephony.SmsManager;
 import android.util.Log;
 import android.widget.Toast;
 import android.net.Uri;
+import android.Manifest;
 import android.content.pm.PackageManager;
 
 import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
 import androidx.annotation.NonNull;
 
 import com.example.saftyapp.MainActivity;
@@ -206,7 +208,7 @@ public class EmergencyService extends Service implements SensorEventListener {
         loadUserSettings();
 
         // Update notification
-        startForeground(NOTIFICATION_ID, buildEmergencyNotification("Emergency Countdown Started", "SOS triggered via " + triggerSource + ". Starting alerts in " + countdownTime + "s."));
+        safeStartForeground(NOTIFICATION_ID, buildEmergencyNotification("Emergency Countdown Started", "SOS triggered via " + triggerSource + ". Starting alerts in " + countdownTime + "s."));
 
         if (listener != null) {
             listener.onEmergencyStateChanged(true, false);
@@ -295,6 +297,41 @@ public class EmergencyService extends Service implements SensorEventListener {
         syncServiceState();
     }
 
+    private int getAvailableForegroundServiceTypes() {
+        int types = 0;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                types |= android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION;
+            }
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                types |= android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA;
+            }
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+                types |= android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE;
+            }
+        }
+        return types;
+    }
+
+    private void safeStartForeground(int id, Notification notification) {
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                int types = getAvailableForegroundServiceTypes();
+                if (types != 0) {
+                    startForeground(id, notification, types);
+                } else {
+                    Log.w(TAG, "No specific permissions granted for location, camera, or mic. Starting foreground service with default settings.");
+                    startForeground(id, notification);
+                }
+            } else {
+                startForeground(id, notification);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to start foreground service safely", e);
+        }
+    }
+
     public void syncServiceState() {
         boolean shouldMonitor = sessionManager.isTriggerPowerTriple() ||
                 sessionManager.isTriggerShake() ||
@@ -309,7 +346,7 @@ public class EmergencyService extends Service implements SensorEventListener {
         if (shouldMonitor) {
             if (!isMonitoring) {
                 isMonitoring = true;
-                startForeground(NOTIFICATION_ID, buildMonitorNotification());
+                safeStartForeground(NOTIFICATION_ID, buildMonitorNotification());
                 registerBackgroundTriggers();
             }
         } else {
@@ -339,7 +376,11 @@ public class EmergencyService extends Service implements SensorEventListener {
         IntentFilter screenFilter = new IntentFilter();
         screenFilter.addAction(Intent.ACTION_SCREEN_ON);
         screenFilter.addAction(Intent.ACTION_SCREEN_OFF);
-        registerReceiver(screenReceiver, screenFilter);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(screenReceiver, screenFilter, Context.RECEIVER_NOT_EXPORTED);
+        } else {
+            registerReceiver(screenReceiver, screenFilter);
+        }
 
         // 2. Shake detection
         if (sessionManager.isTriggerShake()) {
@@ -356,7 +397,11 @@ public class EmergencyService extends Service implements SensorEventListener {
 
         // 4. Volume combo listener (we can capture volume level changes dynamically)
         IntentFilter volFilter = new IntentFilter("android.media.VOLUME_CHANGED_ACTION");
-        registerReceiver(volumeReceiver, volFilter);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(volumeReceiver, volFilter, Context.RECEIVER_NOT_EXPORTED);
+        } else {
+            registerReceiver(volumeReceiver, volFilter);
+        }
     }
 
     private void unregisterBackgroundTriggers() {
@@ -454,6 +499,10 @@ public class EmergencyService extends Service implements SensorEventListener {
 
     // VOICE MONITORING
     private void startSpeechListening() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            Log.w(TAG, "RECORD_AUDIO permission not granted. Voice trigger disabled.");
+            return;
+        }
         if (!SpeechRecognizer.isRecognitionAvailable(this)) return;
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
         speechIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
@@ -677,6 +726,11 @@ public class EmergencyService extends Service implements SensorEventListener {
     // LOCATION TRACKING
     @SuppressLint("MissingPermission")
     private void startLocationTracking() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Log.w(TAG, "Location permissions not granted. Cannot start location tracking.");
+            return;
+        }
         LocationRequest request = new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 30000)
                 .setMinUpdateIntervalMillis(15000)
                 .build();
@@ -735,6 +789,10 @@ public class EmergencyService extends Service implements SensorEventListener {
 
     // AUDIO CAPTURE
     private void startAudioRecording() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            Log.w(TAG, "RECORD_AUDIO permission not granted. Skipping audio recording.");
+            return;
+        }
         try {
             File dir = new File(getFilesDir(), "evidence");
             if (!dir.exists()) dir.mkdirs();
@@ -771,6 +829,10 @@ public class EmergencyService extends Service implements SensorEventListener {
 
     // PHOTO CAPTURE
     private void captureEvidencePhotos() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            Log.w(TAG, "CAMERA permission not granted. Skipping photo capture.");
+            return;
+        }
         // Temporarily pause strobe flashlight during photo capture to avoid camera resource collision
         stopStrobeFlashlight();
         
@@ -900,6 +962,11 @@ public class EmergencyService extends Service implements SensorEventListener {
     }
 
     private void sendSmsWithRetry(String phoneNumber, String message, int attempt) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
+            Log.w(TAG, "SEND_SMS permission not granted. Cannot send SMS.");
+            saveSmsLog(phoneNumber, message, "FAILED: Permission Denied");
+            return;
+        }
         SmsManager smsManager;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             smsManager = getSystemService(SmsManager.class);
@@ -1059,6 +1126,13 @@ public class EmergencyService extends Service implements SensorEventListener {
 
     @SuppressLint("MissingPermission")
     private void startEmergencyAfterLocationAvailable() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Log.w(TAG, "Location permissions not granted. Falling back to default message dispatch.");
+            sendFallbackSMS();
+            triggerCallIfEnabled();
+            return;
+        }
         locationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
                 .addOnSuccessListener(location -> {
                     if (location != null) {

@@ -168,6 +168,7 @@ public class AboutActivity extends AppCompatActivity {
     }
 
     private void showContributorsDialog() {
+        if (isFinishing() || isDestroyed()) return;
         new MaterialAlertDialogBuilder(this)
                 .setTitle("Contributors")
                 .setMessage("We thank all project contributors and community members:\n\n" +
@@ -182,6 +183,7 @@ public class AboutActivity extends AppCompatActivity {
     }
 
     private void showSupportDialog() {
+        if (isFinishing() || isDestroyed()) return;
         new MaterialAlertDialogBuilder(this)
                 .setTitle("Support SOS Alerter")
                 .setMessage(
@@ -198,6 +200,7 @@ public class AboutActivity extends AppCompatActivity {
     }
 
     private void showPrivacyDialog() {
+        if (isFinishing() || isDestroyed()) return;
         new MaterialAlertDialogBuilder(this)
                 .setTitle("Privacy Policy")
                 .setMessage("Privacy is the fundamental tenet of SOS Alerter.\n\n" +
@@ -213,6 +216,7 @@ public class AboutActivity extends AppCompatActivity {
     }
 
     private void showLicenseDialog() {
+        if (isFinishing() || isDestroyed()) return;
         new MaterialAlertDialogBuilder(this)
                 .setTitle("GPL-3.0 License")
                 .setMessage("SOS Alerter is licensed under the GNU General Public License v3.0.\n\n" +
@@ -226,6 +230,7 @@ public class AboutActivity extends AppCompatActivity {
     }
 
     private void showThirdPartyLicensesDialog() {
+        if (isFinishing() || isDestroyed()) return;
         new MaterialAlertDialogBuilder(this)
                 .setTitle("Third Party Licenses")
                 .setMessage("This application relies on the following open source libraries:\n\n" +
@@ -242,6 +247,7 @@ public class AboutActivity extends AppCompatActivity {
     }
 
     private void showOpenSourceNoticesDialog() {
+        if (isFinishing() || isDestroyed()) return;
         new MaterialAlertDialogBuilder(this)
                 .setTitle("Open Source Notice")
                 .setMessage(

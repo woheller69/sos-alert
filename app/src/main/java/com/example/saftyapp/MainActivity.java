@@ -140,8 +140,6 @@ public class MainActivity extends AppCompatActivity implements EmergencyService.
         setupSosPanel();
         setupHistoryPanel();
         setupSettingsPanel();
-        
-        checkAndRequestPermissions();
     }
 
     private void initializeUI() {
@@ -204,22 +202,23 @@ public class MainActivity extends AppCompatActivity implements EmergencyService.
 
     // TAB NAVIGATION
     private void setupNavigation() {
+        if (bottomNavigation == null) return;
         bottomNavigation.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
             if (id == R.id.nav_sos) {
-                panelSos.setVisibility(View.VISIBLE);
-                panelHistory.setVisibility(View.GONE);
-                panelSettings.setVisibility(View.GONE);
+                if (panelSos != null) panelSos.setVisibility(View.VISIBLE);
+                if (panelHistory != null) panelHistory.setVisibility(View.GONE);
+                if (panelSettings != null) panelSettings.setVisibility(View.GONE);
                 return true;
             } else if (id == R.id.nav_history) {
-                panelSos.setVisibility(View.GONE);
-                panelHistory.setVisibility(View.VISIBLE);
-                panelSettings.setVisibility(View.GONE);
+                if (panelSos != null) panelSos.setVisibility(View.GONE);
+                if (panelHistory != null) panelHistory.setVisibility(View.VISIBLE);
+                if (panelSettings != null) panelSettings.setVisibility(View.GONE);
                 return true;
             } else if (id == R.id.nav_settings) {
-                panelSos.setVisibility(View.GONE);
-                panelHistory.setVisibility(View.GONE);
-                panelSettings.setVisibility(View.VISIBLE);
+                if (panelSos != null) panelSos.setVisibility(View.GONE);
+                if (panelHistory != null) panelHistory.setVisibility(View.GONE);
+                if (panelSettings != null) panelSettings.setVisibility(View.VISIBLE);
                 return true;
             } else if (id == R.id.nav_about) {
                 Intent intent = new Intent(MainActivity.this, AboutActivity.class);
@@ -357,109 +356,134 @@ public class MainActivity extends AppCompatActivity implements EmergencyService.
     // CONFIGURATION PANEL SETUP
     private void setupSettingsPanel() {
         // Profile fields
-        etUserNameSetting.setText(sessionManager.getUserName());
-        etUserNameSetting.addTextChangedListener(new SimpleTextWatcher() {
-            @Override
-            public void afterTextChanged(Editable s) {
-                sessionManager.saveUserName(s.toString().trim());
-            }
-        });
+        // Profile fields
+        if (etUserNameSetting != null) {
+            etUserNameSetting.setText(sessionManager.getUserName());
+            etUserNameSetting.addTextChangedListener(new SimpleTextWatcher() {
+                @Override
+                public void afterTextChanged(Editable s) {
+                    sessionManager.saveUserName(s.toString().trim());
+                }
+            });
+        }
 
-        etMessageSetting.setText(sessionManager.getCustomMessage());
-        etMessageSetting.addTextChangedListener(new SimpleTextWatcher() {
-            @Override
-            public void afterTextChanged(Editable s) {
-                sessionManager.saveCustomMessage(s.toString().trim());
-            }
-        });
+        if (etMessageSetting != null) {
+            etMessageSetting.setText(sessionManager.getCustomMessage());
+            etMessageSetting.addTextChangedListener(new SimpleTextWatcher() {
+                @Override
+                public void afterTextChanged(Editable s) {
+                    sessionManager.saveCustomMessage(s.toString().trim());
+                }
+            });
+        }
 
-        etSmsInterval.setText(String.valueOf(sessionManager.getSmsIntervalSeconds()));
-        etSmsInterval.addTextChangedListener(new SimpleTextWatcher() {
-            @Override
-            public void afterTextChanged(Editable s) {
-                try {
-                    int val = Integer.parseInt(s.toString().trim());
-                    if (val > 5) {
-                        sessionManager.saveSmsIntervalSeconds(val);
-                    }
-                } catch (NumberFormatException ignored) {}
-            }
-        });
+        if (etSmsInterval != null) {
+            etSmsInterval.setText(String.valueOf(sessionManager.getSmsIntervalSeconds()));
+            etSmsInterval.addTextChangedListener(new SimpleTextWatcher() {
+                @Override
+                public void afterTextChanged(Editable s) {
+                    try {
+                        int val = Integer.parseInt(s.toString().trim());
+                        if (val > 5) {
+                            sessionManager.saveSmsIntervalSeconds(val);
+                        }
+                    } catch (NumberFormatException ignored) {}
+                }
+            });
+        }
 
         // Activation Checkboxes
-        cbPowerTriple.setChecked(sessionManager.isTriggerPowerTriple());
-        cbPowerTriple.setOnCheckedChangeListener((bView, checked) -> {
-            sessionManager.setTriggerPowerTriple(checked);
-            syncServiceSettings();
-        });
+        if (cbPowerTriple != null) {
+            cbPowerTriple.setChecked(sessionManager.isTriggerPowerTriple());
+            cbPowerTriple.setOnCheckedChangeListener((bView, checked) -> {
+                sessionManager.setTriggerPowerTriple(checked);
+                syncServiceSettings();
+            });
+        }
 
-        cbLongPress.setChecked(sessionManager.isTriggerLongPress());
-        cbLongPress.setOnCheckedChangeListener((bView, checked) -> {
-            sessionManager.setTriggerLongPress(checked);
-        });
+        if (cbLongPress != null) {
+            cbLongPress.setChecked(sessionManager.isTriggerLongPress());
+            cbLongPress.setOnCheckedChangeListener((bView, checked) -> {
+                sessionManager.setTriggerLongPress(checked);
+            });
+        }
 
-        cbVolumeCombo.setChecked(sessionManager.isTriggerVolumeCombo());
-        cbVolumeCombo.setOnCheckedChangeListener((bView, checked) -> {
-            sessionManager.setTriggerVolumeCombo(checked);
-            syncServiceSettings();
-        });
+        if (cbVolumeCombo != null) {
+            cbVolumeCombo.setChecked(sessionManager.isTriggerVolumeCombo());
+            cbVolumeCombo.setOnCheckedChangeListener((bView, checked) -> {
+                sessionManager.setTriggerVolumeCombo(checked);
+                syncServiceSettings();
+            });
+        }
 
-        cbShakeTrigger.setChecked(sessionManager.isTriggerShake());
-        cbShakeTrigger.setOnCheckedChangeListener((bView, checked) -> {
-            sessionManager.setTriggerShake(checked);
-            syncServiceSettings();
-        });
+        if (cbShakeTrigger != null) {
+            cbShakeTrigger.setChecked(sessionManager.isTriggerShake());
+            cbShakeTrigger.setOnCheckedChangeListener((bView, checked) -> {
+                sessionManager.setTriggerShake(checked);
+                syncServiceSettings();
+            });
+        }
 
-        cbVoiceTrigger.setChecked(sessionManager.isTriggerVoice());
-        cbVoiceTrigger.setOnCheckedChangeListener((bView, checked) -> {
-            sessionManager.setTriggerVoice(checked);
-            syncServiceSettings();
-        });
+        if (cbVoiceTrigger != null) {
+            cbVoiceTrigger.setChecked(sessionManager.isTriggerVoice());
+            cbVoiceTrigger.setOnCheckedChangeListener((bView, checked) -> {
+                sessionManager.setTriggerVoice(checked);
+                syncServiceSettings();
+            });
+        }
 
         // Siren and Flash Options
-        cbSiren.setChecked(sessionManager.isSirenEnabled());
-        cbSiren.setOnCheckedChangeListener((bView, checked) -> {
-            sessionManager.setSirenEnabled(checked);
-        });
+        if (cbSiren != null) {
+            cbSiren.setChecked(sessionManager.isSirenEnabled());
+            cbSiren.setOnCheckedChangeListener((bView, checked) -> {
+                sessionManager.setSirenEnabled(checked);
+            });
+        }
 
-        cbFlashlight.setChecked(sessionManager.isFlashlightEnabled());
-        cbFlashlight.setOnCheckedChangeListener((bView, checked) -> {
-            sessionManager.setFlashlightEnabled(checked);
-        });
+        if (cbFlashlight != null) {
+            cbFlashlight.setChecked(sessionManager.isFlashlightEnabled());
+            cbFlashlight.setOnCheckedChangeListener((bView, checked) -> {
+                sessionManager.setFlashlightEnabled(checked);
+            });
+        }
 
         // Loud/Silent selection
-        if (sessionManager.isLoudMode()) {
-            rgAlertVolume.check(R.id.rbLoud);
-        } else {
-            rgAlertVolume.check(R.id.rbSilent);
+        if (rgAlertVolume != null) {
+            if (sessionManager.isLoudMode()) {
+                rgAlertVolume.check(R.id.rbLoud);
+            } else {
+                rgAlertVolume.check(R.id.rbSilent);
+            }
+            rgAlertVolume.setOnCheckedChangeListener((group, checkedId) -> {
+                sessionManager.setLoudMode(checkedId == R.id.rbLoud);
+            });
         }
-        rgAlertVolume.setOnCheckedChangeListener((group, checkedId) -> {
-            sessionManager.setLoudMode(checkedId == R.id.rbLoud);
-        });
 
         // Contacts list management
-        rvContacts.setLayoutManager(new LinearLayoutManager(this));
-        contactsAdapter = new ContactsAdapter(
-            contact -> {
-                viewModel.deleteContact(contact);
-                if (editingContactId == contact.getId()) {
-                    editingContactId = -1;
-                    etNewContactName.setText("");
-                    etNewContactPhone.setText("");
-                    etNewContactPriority.setText("");
-                    btnAddContact.setIcon(ContextCompat.getDrawable(this, android.R.drawable.ic_menu_add));
+        if (rvContacts != null) {
+            rvContacts.setLayoutManager(new LinearLayoutManager(this));
+            contactsAdapter = new ContactsAdapter(
+                contact -> {
+                    viewModel.deleteContact(contact);
+                    if (editingContactId == contact.getId()) {
+                        editingContactId = -1;
+                        if (etNewContactName != null) etNewContactName.setText("");
+                        if (etNewContactPhone != null) etNewContactPhone.setText("");
+                        if (etNewContactPriority != null) etNewContactPriority.setText("");
+                        if (btnAddContact != null) btnAddContact.setIcon(ContextCompat.getDrawable(this, android.R.drawable.ic_menu_add));
+                    }
+                },
+                contact -> {
+                    editingContactId = contact.getId();
+                    if (etNewContactName != null) etNewContactName.setText(contact.getName());
+                    if (etNewContactPhone != null) etNewContactPhone.setText(contact.getPhoneNumber());
+                    if (etNewContactPriority != null) etNewContactPriority.setText(String.valueOf(contact.getPriority()));
+                    if (btnAddContact != null) btnAddContact.setIcon(ContextCompat.getDrawable(this, android.R.drawable.ic_menu_save));
+                    Toast.makeText(this, "Editing contact: " + contact.getName(), Toast.LENGTH_SHORT).show();
                 }
-            },
-            contact -> {
-                editingContactId = contact.getId();
-                etNewContactName.setText(contact.getName());
-                etNewContactPhone.setText(contact.getPhoneNumber());
-                etNewContactPriority.setText(String.valueOf(contact.getPriority()));
-                btnAddContact.setIcon(ContextCompat.getDrawable(this, android.R.drawable.ic_menu_save));
-                Toast.makeText(this, "Editing contact: " + contact.getName(), Toast.LENGTH_SHORT).show();
-            }
-        );
-        rvContacts.setAdapter(contactsAdapter);
+            );
+            rvContacts.setAdapter(contactsAdapter);
+        }
 
         // Observe contacts list
         viewModel.getAllContacts().observe(this, contacts -> {
@@ -663,6 +687,7 @@ public class MainActivity extends AppCompatActivity implements EmergencyService.
     }
 
     private void showCloudSyncComingSoonDialog() {
+        if (isFinishing() || isDestroyed()) return;
         new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
                 .setTitle("Cloud Sync")
                 .setMessage("This feature is currently under development.\n\n" +
@@ -689,9 +714,11 @@ public class MainActivity extends AppCompatActivity implements EmergencyService.
                 cbEnableCalling.setChecked(sessionManager.isEmergencyCallingEnabled());
             }
         }
+        syncServiceSettings();
     }
 
     private void updateGpsStatus() {
+        if (tvGpsStatus == null) return;
         boolean hasPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
         LocationManager lm = (LocationManager) getSystemService(LOCATION_SERVICE);
         boolean gpsEnabled = false;
