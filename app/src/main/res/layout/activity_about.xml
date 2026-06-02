@@ -442,7 +442,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Founder &amp; Lead Developer"
+                        android:text="Developer &amp; Project Maintainer"
                         android:textColor="@color/accent_green"
                         android:textSize="13sp"
                         android:textStyle="bold"
@@ -453,7 +453,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:layout_marginBottom="14dp"
-                        android:text="Software Engineering Student, Linux User, FOSS Advocate and Open Source Contributor."
+                        android:text="Software Engineering Student, Linux User, FOSS Enthusiast and Open Source Contributor."
                         android:textColor="@color/text_secondary"
                         android:textSize="14sp" />
 
