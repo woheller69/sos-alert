@@ -1,113 +1,184 @@
-# Guardian Safety App
+<p align="center">
+  <img src="screenshots/app_icon.jpg" width="160" height="160" alt="SOS Alerter Icon">
+</p>
 
-Guardian is a personal emergency safety application for Android that allows users to quickly trigger an SOS alert to a predefined contact. When activated, the app sends an SMS containing the user's live location and custom emergency message, while simultaneously recording audio, sounding an alarm, and turning on the flashlight.
+<h1 align="center">SOS Alerter</h1>
 
-## Features
-- **One-Tap Emergency Alert**: Rapidly trigger the panic protocol.
-- **Location Sharing**: Automatically fetches and sends high-accuracy GPS coordinates via SMS.
-- **Audio Recording**: Starts recording audio locally as soon as the emergency is triggered.
-- **Siren & Flashlight**: Optional alarms and strobe light for immediate attention in critical situations.
-- **Session Management**: Automatically keeps the user logged in and remembers their emergency contact settings.
+<p align="center">
+  <strong>Protect. Alert. Respond.</strong>
+</p>
 
----
+<p align="center">
+  Modern, privacy-focused emergency assistance application for Android.
+</p>
 
-## Prerequisites
-
-Before setting up the project, ensure you have the following installed:
-- **Java Development Kit (JDK) 17** or higher.
-- **Android Studio** (Flamingo or later recommended).
-- **Git** (for version control).
-
----
-
-## 🛠 Android SDK Setup
-
-Whether you are on Windows or Linux, you will need the Android SDK. Android Studio installs this automatically, but if you want to set it up manually or run command-line builds:
-
-1. **Download Android Studio**: Get it from the [official Android Developer website](https://developer.android.com/studio).
-2. **Install the SDK**: During the initial Android Studio setup, make sure the **Android SDK**, **Android SDK Command-line Tools**, and **Android SDK Build-Tools** are checked.
-3. **Set Environment Variables**: 
-   You need to define the `ANDROID_HOME` environment variable pointing to your SDK directory.
-   - **Linux Default Path**: `/home/<Your-Username>/Android/Sdk`
-   - **Windows Default Path**: `C:\Users\<Your-Username>\AppData\Local\Android\Sdk`
+<p align="center">
+  <a href="https://github.com/dhilipmpms/SOS-alerter/releases"><img src="https://img.shields.io/github/v/release/dhilipmpms/SOS-alerter?style=flat-square&color=blue" alt="Latest Release"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-GPL--3.0-green.svg?style=flat-square" alt="License"></a>
+  <img src="https://img.shields.io/badge/Platform-Android-00C853?style=flat-square" alt="Platform">
+  <img src="https://img.shields.io/badge/Design-Material--3-blueviolet?style=flat-square" alt="Material 3">
+</p>
 
 ---
 
-## 🚀 Setup Instructions
+## 📱 Screenshots
 
+Arrange and preview the main screens of SOS Alerter:
 
+| **Welcome & Permissions** | **First-Time Setup** |
+| :---: | :---: |
+| <img src="screenshots/welcome.png" width="300" alt="Welcome Screen"> | <img src="screenshots/setup.png" width="300" alt="First-Time Setup Screen"> |
+| *Welcome Onboarding & Permission Explanation Dialog* | *Primary Contact & Owner Profile Registration* |
 
-### For Linux
+| **Home Screen** | **Settings Panel** |
+| :---: | :---: |
+| <img src="screenshots/home.png" width="300" alt="Home Screen"> | <img src="screenshots/settings.png" width="300" alt="Settings Screen"> |
+| *SOS Button, GPS Tracking Status, and Quick Actions* | *SOS Activation Triggers & Alarm Settings Configuration* |
+
+---
+
+## ✨ Features
+
+Every feature listed below currently exists in the codebase and is fully functional.
+
+### 🚨 Emergency Actions
+* **Emergency SMS Alerts**: Automatically dispatches a formatted emergency alert SMS to your primary emergency contact.
+* **GPS Location Sharing**: Fetches and appends high-accuracy GPS coordinates to your emergency SMS message.
+* **Emergency Direct Dialing**: Initiates an automated phone call to your emergency contact or local emergency line.
+* **Live Location Tracking**: Continuously updates emergency contacts with real-time GPS locations via SMS at customizable tracking intervals (e.g., every 60 seconds).
+* **Audio Evidence Recording**: Silently records audio evidence locally via the device's microphone during an active emergency.
+* **Evidence Photo Capture**: Captures photos silently using the front and back cameras and stores them securely on internal storage.
+* **Loud Siren Alarm**: Sounds a loud, high-pitched emergency siren to alert nearby bystanders.
+* **Strobe Flashlight**: Flashes the camera torch continuously as a distress signal to improve nighttime visibility.
+* **Loud & Silent Modes**: Fully configurable to trigger silently (stealth mode) or loudly depending on the threat scenario.
+
+### ⚡ SOS Activation Triggers
+* **Power Button Triple Press**: Press the hardware power button three times in rapid succession.
+* **Long Press SOS Button**: Press and hold the main interface button.
+* **Rapid Volume Button Clicks**: Press volume buttons in rapid succession.
+* **Device Shake Trigger**: Shake your device to automatically initialize countdown/alerts using the accelerometer sensor.
+* **Voice Activation**: Say the trigger phrase **"Help Me"** to trigger hands-free assistance.
+
+---
+
+## 🛠 Building From Source
+
+Follow these steps to compile and package the app manually.
+
+### Requirements
+* **Android Studio** (Flamingo or later recommended)
+* **Android SDK** (API level 34)
+* **Java Development Kit (JDK 17)** or higher
+* **Gradle 8.0+**
+
+### Build Steps
 
 1. **Clone the Repository**:
-   Open your terminal and run:
    ```bash
-   git clone https://github.com/your-usernameSOS-alerter/
+   git clone https://github.com/dhilipmpms/SOS-alerter.git
    cd SOS-alerter
    ```
-2. **Set Environment Variables**:
-   Open your `~/.bashrc` or `~/.zshrc` file and add the following lines at the end:
-   ```bash
-   export ANDROID_HOME=$HOME/Android/Sdk
-   export PATH=$PATH:$ANDROID_HOME/emulator
-   export PATH=$PATH:$ANDROID_HOME/tools
-   export PATH=$PATH:$ANDROID_HOME/tools/bin
-   export PATH=$PATH:$ANDROID_HOME/platform-tools
-   ```
-   Apply the changes by running:
-   ```bash
-   source ~/.bashrc  # or source ~/.zshrc
-   ```
-3. **Configure Local Properties**:
-   Ensure you have a `local.properties` file in the root of the project pointing to your SDK:
-   ```properties
-   sdk.dir=/home/<Your-Username>/Android/Sdk
-   ```
-4. **Open in Android Studio**:
-   - Launch Android Studio from your terminal (`studio.sh`) or application menu.
-   - Click on **Open** and select the `saftyapp` folder.
 
-
-### For Windows
-
-1. **Clone the Repository**:
-   Open Command Prompt or PowerShell and run:
-   ```bash
-   git clone https://github.com/your-username/saftyapp.git
-   cd saftyapp
-   ```
 2. **Open in Android Studio**:
    - Open Android Studio.
-   - Click on **Open**.
-   - Navigate to the cloned `saftyapp` directory and select it.
-3. **Environment Variables**:
-   - Press `Win + S`, search for "Environment Variables".
-   - Under User Variables, add `ANDROID_HOME` with the path to your Android SDK.
-   - Edit the `Path` variable and add `%ANDROID_HOME%\platform-tools`.
-4. **Sync Gradle**: Android Studio will automatically sync the Gradle files. If it fails, click **File > Sync Project with Gradle Files**.
+   - Select **File > Open** (or **Open an Existing Project**).
+   - Navigate to the cloned folder and select it.
+
+3. **Sync Gradle**:
+   - Android Studio will automatically index files and sync dependencies. 
+   - If needed, manually select **File > Sync Project with Gradle Files**.
+
+4. **Build APK**:
+   - To build the debug package, navigate to **Build > Build Bundle(s) / APK(s) > Build APK(s)**.
+   - Alternatively, build from the command line using:
+     ```bash
+     ./gradlew assembleDebug
+     ```
+
+5. **Run the Application**:
+   - Connect an Android device with USB debugging enabled, or launch an AVD emulator.
+   - Click the green **Run** button in Android Studio, or install the compiled APK via terminal:
+     ```bash
+     ./gradlew installDebug
+     ```
 
 ---
 
+## 📦 Installation
 
-## 🏃 Running the App
+To download and install the app directly on your Android device:
 
-### Using Android Studio
-1. Connect a physical Android device via USB (enable USB Debugging in Developer Options) or start an Android Virtual Device (AVD) from Android Studio.
-2. In Android Studio, click the green **Run** button (Shift + F10).
-3. Accept the necessary runtime permissions (Camera, Location, Microphone, SMS) when prompted on the device.
+1. Download the latest compiled `.apk` file from the [Releases](https://github.com/dhilipmpms/SOS-alerter/releases) section.
+2. Enable installation from unknown sources in your Android settings.
+3. Open the downloaded `.apk` file and tap **Install**.
 
-### Using Terminal
-You can also build and install the app directly from your terminal using Gradle:
+---
 
-1. Connect a physical Android device or start an emulator.
-2. Build the debug APK:
-   ```bash
-   ./gradlew assembleDebug
-   ```
-3. Install the debug APK on your connected device:
-   ```bash
-   ./gradlew installDebug
-   ```
+## 🔒 Permissions
 
-## Note on GitHub
-This repository contains a `.gitignore` file configured for Android. Automatically generated build files, `.idea` configuration files, and `local.properties` (which contains your local SDK path) are intentionally excluded from version control to prevent path conflicts across different computers.
+SOS Alerter is privacy-first, requesting only the permissions necessary to ensure safety features can function reliably in the background:
+
+* **Location (`ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION`)**: Retrieves high-accuracy GPS coordinates to send to your emergency contacts.
+* **SMS (`SEND_SMS`)**: Sends automated SMS alerts and location tracking updates to your contacts.
+* **Phone (`CALL_PHONE`)**: Initiates direct calls to your emergency contact or local authorities.
+* **Camera (`CAMERA`)**: Captures silent evidence photographs via front/back camera sensors.
+* **Microphone (`RECORD_AUDIO`)**: Enables offline voice trigger detection ("Help Me") and local evidence recording.
+* **Notifications (`POST_NOTIFICATIONS`)**: Keeps the background monitoring service running reliably via a persistent system notification.
+
+---
+
+## 🛡 Privacy Policy
+
+* **Zero Advertisements**: The application does not contain ads or sponsored trackers.
+* **No Telemetry / Analytics**: We do not collect, aggregate, or upload user usage details, crash reports, or personal data.
+* **Offline-First Design**: The application functions entirely offline. SMS and calling rely purely on standard cellular network services.
+* **Local Data Storage**: All emergency contacts, credentials, photos, and audio files are stored securely on the device's internal storage and never leave the device.
+
+---
+
+## 🗺 Roadmap
+
+Features currently planned for future releases:
+
+* [ ] **End-to-End Encrypted Cloud Sync** (Optional backup for logs/settings)
+* [ ] **Wear OS Smartwatch Companion App**
+* [ ] **Multi-Language Offline Localization**
+* [ ] **Customizable Home Screen Widgets**
+
+---
+
+## 📄 License
+
+This project is licensed under the **GNU GPL-3.0 License**. See the [LICENSE](LICENSE) file for details.
+
+---
+
+## 👥 Credits
+
+### Created and Maintained by
+* **Dhilip M**
+  * Software Engineering Student
+  * Linux User
+  * FOSS Activist
+  * Open Source Contributor
+  * **GitHub**: [@dhilipmpms](https://github.com/dhilipmpms)
+
+---
+
+## 🤝 Contributing
+
+Contributions of any kind are welcome! Please read our [CONTRIBUTING.md](CONTRIBUTING.md) to understand project standards, setup steps, and formatting guidelines.
+
+---
+
+## 💬 Support
+
+* **Bug Tracking**: Please open bug reports and issue submissions via [GitHub Issues](https://github.com/dhilipmpms/SOS-alerter/issues).
+* **Community Help**: Join community discussions and request help on [GitHub Discussions](https://github.com/dhilipmpms/SOS-alerter/discussions).
+
+---
+
+## ❤️ Acknowledgements
+
+* **Free Software Community**
+* **Android Open Source Ecosystem**
