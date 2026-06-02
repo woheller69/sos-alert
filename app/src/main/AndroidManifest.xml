@@ -19,6 +19,18 @@
     <!-- Notification Permissions (Android 13+) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <!-- Foreground Service Permissions (Android 9+) -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <!-- Android 14+ Foreground Service Types -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+
+    <!-- Startup Permission -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_guardian"
@@ -36,7 +48,16 @@
         </activity>
         <activity android:name=".LoginActivity" />
         <activity android:name=".RegisterActivity" />
-        <activity android:name=".MainActivity" />
+        <activity android:name=".MainActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustPan" />
+
+        <!-- Foreground Emergency Service -->
+        <service
+            android:name=".service.EmergencyService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="location|camera|microphone" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
