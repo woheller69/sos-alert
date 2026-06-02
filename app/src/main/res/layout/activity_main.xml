@@ -640,6 +640,96 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
+                <!-- Emergency Calling Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    app:cardBackgroundColor="@color/card_bg"
+                    app:cardCornerRadius="16dp"
+                    app:strokeWidth="0dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Emergency Calling"
+                            android:textColor="@color/text_primary"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="Automatically place a call to your selected emergency contact after SOS activation. Disable this option if you prefer silent emergency alerts."
+                            android:textColor="@color/text_secondary"
+                            android:textSize="13sp" />
+
+                        <CheckBox
+                            android:id="@+id/cbEnableCalling"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:text="Enable Emergency Calling"
+                            android:textColor="@color/white" />
+
+                        <!-- Contact Selector Spinner -->
+                        <LinearLayout
+                            android:id="@+id/layoutCallingContact"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:layout_marginTop="8dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Emergency Call Contact"
+                                android:textColor="@color/text_secondary"
+                                android:textSize="12sp" />
+
+                            <Spinner
+                                android:id="@+id/spCallingContact"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:textColor="@color/white"
+                                android:backgroundTint="@color/white" />
+                        </LinearLayout>
+
+                        <!-- Delay Selector Spinner -->
+                        <LinearLayout
+                            android:id="@+id/layoutCallingDelay"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:layout_marginTop="12dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Call Delay"
+                                android:textColor="@color/text_secondary"
+                                android:textSize="12sp" />
+
+                            <Spinner
+                                android:id="@+id/spCallingDelay"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:textColor="@color/white"
+                                android:backgroundTint="@color/white" />
+                        </LinearLayout>
+
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
                 <!-- Contacts manager -->
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
@@ -753,6 +843,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="12dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
                     app:cardBackgroundColor="@color/card_bg"
                     app:cardCornerRadius="16dp"
                     app:strokeWidth="0dp">
@@ -779,9 +872,21 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="16dp"
-                                android:text="Cloud Account (Optional)"
+                                android:text="Cloud Sync"
                                 android:textColor="@color/text_primary"
                                 android:textSize="16sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="8dp"
+                                android:background="@drawable/badge_coming_soon"
+                                android:paddingHorizontal="8dp"
+                                android:paddingVertical="2dp"
+                                android:text="Coming Soon"
+                                android:textColor="@color/white"
+                                android:textSize="10sp"
                                 android:textStyle="bold" />
                         </LinearLayout>
 
@@ -793,16 +898,6 @@
                             android:text="Offline Mode (Data saved locally)"
                             android:textColor="@color/text_secondary"
                             android:textSize="13sp" />
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btnCloudAction"
-                            android:layout_width="match_parent"
-                            android:layout_height="48dp"
-                            android:layout_marginTop="12dp"
-                            android:text="Link Cloud Account"
-                            android:textSize="13sp"
-                            app:backgroundTint="@color/accent_blue"
-                            app:cornerRadius="24dp" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 

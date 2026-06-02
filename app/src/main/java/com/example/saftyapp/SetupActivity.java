@@ -16,7 +16,6 @@ public class SetupActivity extends AppCompatActivity {
 
     private TextInputEditText etUserName, etContactName, etContactPhone;
     private MaterialButton btnCompleteSetup;
-    private TextView tvSetupSignIn;
     private SessionManager sessionManager;
     private EmergencyRepository repository;
 
@@ -33,13 +32,8 @@ public class SetupActivity extends AppCompatActivity {
         etContactName = findViewById(R.id.etContactName);
         etContactPhone = findViewById(R.id.etContactPhone);
         btnCompleteSetup = findViewById(R.id.btnCompleteSetup);
-        tvSetupSignIn = findViewById(R.id.tvSetupSignIn);
 
         btnCompleteSetup.setOnClickListener(v -> completeSetup());
-
-        tvSetupSignIn.setOnClickListener(v -> {
-            startActivity(new Intent(SetupActivity.this, LoginActivity.class));
-        });
     }
 
     private void completeSetup() {

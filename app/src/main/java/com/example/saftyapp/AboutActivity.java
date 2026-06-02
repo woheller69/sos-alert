@@ -52,8 +52,8 @@ public class AboutActivity extends AppCompatActivity {
         try {
             PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
             String versionName = packageInfo.versionName;
-            long versionCode = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P ?
-                    packageInfo.getLongVersionCode() : packageInfo.versionCode;
+            long versionCode = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P ? packageInfo.getLongVersionCode()
+                    : packageInfo.versionCode;
 
             TextView tvVersion = findViewById(R.id.tv_app_version);
             TextView tvBuild = findViewById(R.id.tv_app_build);
@@ -171,11 +171,12 @@ public class AboutActivity extends AppCompatActivity {
         new MaterialAlertDialogBuilder(this)
                 .setTitle("Contributors")
                 .setMessage("We thank all project contributors and community members:\n\n" +
-                        "• Dhilip M — Project Lead & Primary Developer\n" +
+                        "• Dhilip S — Project Lead & Primary Developer\n" +
                         "• Open Source Community — Quality Testers & Translators\n" +
                         "• F-Droid Community — Package Maintainers & Audit Reviewers\n\n" +
                         "Want to be listed here? Join the project on GitHub!")
-                .setPositiveButton("GitHub Contributors", (dialog, which) -> openUrl(GITHUB_REPO_URL + "/graphs/contributors"))
+                .setPositiveButton("GitHub Contributors",
+                        (dialog, which) -> openUrl(GITHUB_REPO_URL + "/graphs/contributors"))
                 .setNegativeButton("Close", null)
                 .show();
     }
@@ -183,12 +184,14 @@ public class AboutActivity extends AppCompatActivity {
     private void showSupportDialog() {
         new MaterialAlertDialogBuilder(this)
                 .setTitle("Support SOS Alerter")
-                .setMessage("SOS Alerter is and will always remain a 100% free and open-source utility, built to offer community safety with zero trackers or subscriptions.\n\n" +
-                        "If you would like to support us, please consider:\n" +
-                        "• Giving a star 🌟 on GitHub\n" +
-                        "• Spreading the word to family and friends\n" +
-                        "• Contributing code contributions or localized translations\n\n" +
-                        "Your non-financial and community support keeps this project alive!")
+                .setMessage(
+                        "SOS Alerter is and will always remain a 100% free and open-source utility, built to offer community safety with zero trackers or subscriptions.\n\n"
+                                +
+                                "If you would like to support us, please consider:\n" +
+                                "• Giving a star 🌟 on GitHub\n" +
+                                "• Spreading the word to family and friends\n" +
+                                "• Contributing code contributions or localized translations\n\n" +
+                                "Your non-financial and community support keeps this project alive!")
                 .setPositiveButton("Star Repository", (dialog, which) -> openUrl(GITHUB_REPO_URL))
                 .setNegativeButton("Close", null)
                 .show();
@@ -198,9 +201,12 @@ public class AboutActivity extends AppCompatActivity {
         new MaterialAlertDialogBuilder(this)
                 .setTitle("Privacy Policy")
                 .setMessage("Privacy is the fundamental tenet of SOS Alerter.\n\n" +
-                        "1. Local Storage: All configuration settings, emergency contacts, and local data records are stored securely on the device and never sent to cloud servers.\n" +
-                        "2. Location Data: Fused Location data is only fetched upon active emergency trigger and sent exclusively via SMS to user-designated contacts.\n" +
-                        "3. Camera & Microphone: Media files are recorded locally on your device for evidence storage and not transmitted externally.\n" +
+                        "1. Local Storage: All configuration settings, emergency contacts, and local data records are stored securely on the device and never sent to cloud servers.\n"
+                        +
+                        "2. Location Data: Fused Location data is only fetched upon active emergency trigger and sent exclusively via SMS to user-designated contacts.\n"
+                        +
+                        "3. Camera & Microphone: Media files are recorded locally on your device for evidence storage and not transmitted externally.\n"
+                        +
                         "4. Telemetry: The application contains absolutely no analytics tools, advertising trackers, or telemetry code.")
                 .setPositiveButton("Close", null)
                 .show();
@@ -210,9 +216,11 @@ public class AboutActivity extends AppCompatActivity {
         new MaterialAlertDialogBuilder(this)
                 .setTitle("GPL-3.0 License")
                 .setMessage("SOS Alerter is licensed under the GNU General Public License v3.0.\n\n" +
-                        "This code represents Free Software. You are free to run, copy, distribute, study, change, and improve the software, provided that any derivative works are also distributed under the same license terms.\n\n" +
+                        "This code represents Free Software. You are free to run, copy, distribute, study, change, and improve the software, provided that any derivative works are also distributed under the same license terms.\n\n"
+                        +
                         "This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.")
-                .setPositiveButton("Full License", (dialog, which) -> openUrl("https://www.gnu.org/licenses/gpl-3.0.html"))
+                .setPositiveButton("Full License",
+                        (dialog, which) -> openUrl("https://www.gnu.org/licenses/gpl-3.0.html"))
                 .setNegativeButton("Close", null)
                 .show();
     }
@@ -236,8 +244,10 @@ public class AboutActivity extends AppCompatActivity {
     private void showOpenSourceNoticesDialog() {
         new MaterialAlertDialogBuilder(this)
                 .setTitle("Open Source Notice")
-                .setMessage("This application is fully open source under the GPL-3.0 license. The source code is publicly accessible, allowing for user audits, custom builds, and security verification.\n\n" +
-                        "You can verify the source, review security implementations, and compile the code directly from our public GitHub repository.")
+                .setMessage(
+                        "This application is fully open source under the GPL-3.0 license. The source code is publicly accessible, allowing for user audits, custom builds, and security verification.\n\n"
+                                +
+                                "You can verify the source, review security implementations, and compile the code directly from our public GitHub repository.")
                 .setPositiveButton("View Source", (dialog, which) -> openUrl(GITHUB_REPO_URL))
                 .setNegativeButton("Close", null)
                 .show();

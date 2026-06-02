@@ -51,6 +51,48 @@ public class SessionManager {
         return prefs.getBoolean(KEY_IS_SETUP_COMPLETED, false);
     }
 
+    private static final String KEY_WELCOME_SHOWN = "welcomeShown";
+
+    public void setWelcomeShown(boolean shown) {
+        editor.putBoolean(KEY_WELCOME_SHOWN, shown);
+        editor.apply();
+    }
+
+    public boolean isWelcomeShown() {
+        return prefs.getBoolean(KEY_WELCOME_SHOWN, false);
+    }
+
+    private static final String KEY_EMERGENCY_CALLING_ENABLED = "emergencyCallingEnabled";
+    private static final String KEY_EMERGENCY_CALL_PHONE = "emergencyCallPhone";
+    private static final String KEY_EMERGENCY_CALL_DELAY = "emergencyCallDelay";
+
+    public void setEmergencyCallingEnabled(boolean enabled) {
+        editor.putBoolean(KEY_EMERGENCY_CALLING_ENABLED, enabled);
+        editor.apply();
+    }
+
+    public boolean isEmergencyCallingEnabled() {
+        return prefs.getBoolean(KEY_EMERGENCY_CALLING_ENABLED, false);
+    }
+
+    public void setEmergencyCallPhone(String phone) {
+        editor.putString(KEY_EMERGENCY_CALL_PHONE, phone);
+        editor.apply();
+    }
+
+    public String getEmergencyCallPhone() {
+        return prefs.getString(KEY_EMERGENCY_CALL_PHONE, "");
+    }
+
+    public void setEmergencyCallDelay(int seconds) {
+        editor.putInt(KEY_EMERGENCY_CALL_DELAY, seconds);
+        editor.apply();
+    }
+
+    public int getEmergencyCallDelay() {
+        return prefs.getInt(KEY_EMERGENCY_CALL_DELAY, 10);
+    }
+
     public void saveUserName(String name) {
         editor.putString(KEY_USER_NAME, name);
         editor.apply();

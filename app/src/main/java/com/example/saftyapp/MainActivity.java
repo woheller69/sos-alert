@@ -20,6 +20,9 @@ import android.widget.ProgressBar;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.Spinner;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -218,6 +221,10 @@ public class MainActivity extends AppCompatActivity implements EmergencyService.
                 panelHistory.setVisibility(View.GONE);
                 panelSettings.setVisibility(View.VISIBLE);
                 return true;
+            } else if (id == R.id.nav_about) {
+                Intent intent = new Intent(MainActivity.this, AboutActivity.class);
+                startActivity(intent);
+                return false;
             }
             return false;
         });
@@ -549,45 +556,139 @@ public class MainActivity extends AppCompatActivity implements EmergencyService.
         }
 
         // Cloud Integration (Optional) Card
-        com.google.android.material.button.MaterialButton btnCloudAction = findViewById(R.id.btnCloudAction);
-        if (btnCloudAction != null) {
-            btnCloudAction.setOnClickListener(v -> {
-                if (sessionManager.isLoggedIn()) {
-                    sessionManager.setLoggedIn(false);
-                    Toast.makeText(MainActivity.this, "Disconnected from Cloud", Toast.LENGTH_SHORT).show();
-                    updateCloudIntegrationUI();
+        View cardCloudIntegration = findViewById(R.id.cardCloudIntegration);
+        if (cardCloudIntegration != null) {
+            cardCloudIntegration.setOnClickListener(v -> showCloudSyncComingSoonDialog());
+        }
+
+        // Emergency Calling controls setup
+        CheckBox cbEnableCalling = findViewById(R.id.cbEnableCalling);
+        Spinner spCallingContact = findViewById(R.id.spCallingContact);
+        Spinner spCallingDelay = findViewById(R.id.spCallingDelay);
+
+        if (cbEnableCalling != null && spCallingContact != null && spCallingDelay != null) {
+            cbEnableCalling.setChecked(sessionManager.isEmergencyCallingEnabled());
+            cbEnableCalling.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                if (isChecked) {
+                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                        cbEnableCalling.setChecked(false);
+                        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CALL_PHONE}, 102);
+                    } else {
+                        sessionManager.setEmergencyCallingEnabled(true);
+                    }
                 } else {
-                    Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-                    startActivity(intent);
+                    sessionManager.setEmergencyCallingEnabled(false);
                 }
             });
+
+            // Populate Call Delay Spinner
+            String[] delays = {"5 Seconds", "10 Seconds", "15 Seconds", "30 Seconds"};
+            ArrayAdapter<String> delayAdapter = new ArrayAdapter<>(this,
+                    android.R.layout.simple_spinner_item, delays);
+            delayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            spCallingDelay.setAdapter(delayAdapter);
+
+            int savedDelay = sessionManager.getEmergencyCallDelay();
+            if (savedDelay == 5) spCallingDelay.setSelection(0);
+            else if (savedDelay == 10) spCallingDelay.setSelection(1);
+            else if (savedDelay == 15) spCallingDelay.setSelection(2);
+            else if (savedDelay == 30) spCallingDelay.setSelection(3);
+
+            spCallingDelay.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    int delay = 10;
+                    if (position == 0) delay = 5;
+                    else if (position == 1) delay = 10;
+                    else if (position == 2) delay = 15;
+                    else if (position == 3) delay = 30;
+                    sessionManager.setEmergencyCallDelay(delay);
+                }
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {}
+            });
+
+            // Populate spCallingContact dynamically from live contacts list
+            viewModel.getAllContacts().observe(this, contacts -> {
+                if (contacts != null) {
+                    List<String> contactNames = new ArrayList<>();
+                    for (Contact c : contacts) {
+                        contactNames.add(c.getName() + " (" + c.getPhoneNumber() + ")");
+                    }
+
+                    if (contactNames.isEmpty()) {
+                        contactNames.add("No Contacts Available");
+                        spCallingContact.setEnabled(false);
+                        cbEnableCalling.setEnabled(false);
+                        cbEnableCalling.setChecked(false);
+                        sessionManager.setEmergencyCallingEnabled(false);
+                    } else {
+                        spCallingContact.setEnabled(true);
+                        cbEnableCalling.setEnabled(true);
+                    }
+
+                    ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
+                            android.R.layout.simple_spinner_item, contactNames);
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    spCallingContact.setAdapter(adapter);
+
+                    String savedPhone = sessionManager.getEmergencyCallPhone();
+                    if (savedPhone != null && !savedPhone.isEmpty()) {
+                        for (int i = 0; i < contacts.size(); i++) {
+                            if (contacts.get(i).getPhoneNumber().equals(savedPhone)) {
+                                spCallingContact.setSelection(i);
+                                break;
+                            }
+                        }
+                    } else if (!contacts.isEmpty()) {
+                        sessionManager.setEmergencyCallPhone(contacts.get(0).getPhoneNumber());
+                        spCallingContact.setSelection(0);
+                    }
+                }
+            });
+
+            spCallingContact.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    List<Contact> currentContacts = viewModel.getAllContacts().getValue();
+                    if (currentContacts != null && position < currentContacts.size()) {
+                        Contact selected = currentContacts.get(position);
+                        sessionManager.setEmergencyCallPhone(selected.getPhoneNumber());
+                    }
+                }
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {}
+            });
         }
-        updateCloudIntegrationUI();
     }
 
-    private void updateCloudIntegrationUI() {
-        TextView tvCloudStatus = findViewById(R.id.tvCloudStatus);
-        com.google.android.material.button.MaterialButton btnCloudAction = findViewById(R.id.btnCloudAction);
-        if (tvCloudStatus != null && btnCloudAction != null) {
-            if (sessionManager.isLoggedIn()) {
-                tvCloudStatus.setText("Linked to Cloud (Sync enabled)");
-                btnCloudAction.setText("Disconnect Cloud Account");
-                btnCloudAction.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
-                        androidx.core.content.ContextCompat.getColor(this, R.color.panic_red)));
-            } else {
-                tvCloudStatus.setText("Offline Mode (Data saved locally)");
-                btnCloudAction.setText("Link Cloud Account");
-                btnCloudAction.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
-                        androidx.core.content.ContextCompat.getColor(this, R.color.accent_blue)));
-            }
-        }
+    private void showCloudSyncComingSoonDialog() {
+        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+                .setTitle("Cloud Sync")
+                .setMessage("This feature is currently under development.\n\n" +
+                        "Future Features:\n" +
+                        "• Backup & Restore\n" +
+                        "• Multi-device Sync\n" +
+                        "• Emergency History Sync\n" +
+                        "• Secure Media Backup")
+                .setPositiveButton("OK", null)
+                .show();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         updateGpsStatus();
-        updateCloudIntegrationUI();
+        
+        CheckBox cbEnableCalling = findViewById(R.id.cbEnableCalling);
+        if (cbEnableCalling != null) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                cbEnableCalling.setChecked(false);
+                sessionManager.setEmergencyCallingEnabled(false);
+            } else {
+                cbEnableCalling.setChecked(sessionManager.isEmergencyCallingEnabled());
+            }
+        }
     }
 
     private void updateGpsStatus() {
@@ -766,6 +867,17 @@ public class MainActivity extends AppCompatActivity implements EmergencyService.
                 pickContact();
             } else {
                 Toast.makeText(this, "Read contacts permission denied", Toast.LENGTH_SHORT).show();
+            }
+        } else if (requestCode == 102) {
+            CheckBox cbEnableCalling = findViewById(R.id.cbEnableCalling);
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                sessionManager.setEmergencyCallingEnabled(true);
+                if (cbEnableCalling != null) cbEnableCalling.setChecked(true);
+                Toast.makeText(this, "Emergency Calling enabled", Toast.LENGTH_SHORT).show();
+            } else {
+                sessionManager.setEmergencyCallingEnabled(false);
+                if (cbEnableCalling != null) cbEnableCalling.setChecked(false);
+                Toast.makeText(this, "Call Phone permission denied. Calling disabled.", Toast.LENGTH_SHORT).show();
             }
         }
     }

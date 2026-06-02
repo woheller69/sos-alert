@@ -37,6 +37,8 @@ import android.speech.SpeechRecognizer;
 import android.telephony.SmsManager;
 import android.util.Log;
 import android.widget.Toast;
+import android.net.Uri;
+import android.content.pm.PackageManager;
 
 import androidx.core.app.NotificationCompat;
 import androidx.annotation.NonNull;
@@ -638,6 +640,9 @@ public class EmergencyService extends Service implements SensorEventListener {
         repository.insertSession(session, sessionId -> {
             currentSessionId = sessionId;
 
+            // Send immediate emergency SMS (within 1 second of countdown completion)
+            handler.post(this::sendImmediateEmergencySMS);
+
             // 2. Start GPS Tracking
             handler.post(this::startLocationTracking);
 
@@ -650,6 +655,23 @@ public class EmergencyService extends Service implements SensorEventListener {
             // 5. Trigger location-based initial SMS dispatch
             handler.post(this::startEmergencyAfterLocationAvailable);
         });
+    }
+
+    private void sendImmediateEmergencySMS() {
+        String userName = sessionManager.getUserName();
+        if (userName == null || userName.trim().isEmpty()) {
+            userName = "The user";
+        }
+        String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
+        String message = "EMERGENCY ALERT\n\n" +
+                userName + " may be in danger.\n\n" +
+                "Emergency mode has been activated.\n" +
+                "Location is currently being acquired.\n" +
+                "Further updates will follow shortly.\n\n" +
+                "Time: " + timestamp;
+
+        dispatchSMSToContacts(message);
+        lastSmsSendTime = System.currentTimeMillis();
     }
 
     // LOCATION TRACKING
@@ -1050,6 +1072,7 @@ public class EmergencyService extends Service implements SensorEventListener {
                             }
                         }).addOnFailureListener(e -> sendFallbackSMS());
                     }
+                    triggerCallIfEnabled();
                 })
                 .addOnFailureListener(e -> {
                     try {
@@ -1063,7 +1086,37 @@ public class EmergencyService extends Service implements SensorEventListener {
                     } catch (Exception ex) {
                         sendFallbackSMS();
                     }
+                    triggerCallIfEnabled();
                 });
+    }
+
+    private void triggerCallIfEnabled() {
+        if (sessionManager.isEmergencyCallingEnabled()) {
+            String phone = sessionManager.getEmergencyCallPhone();
+            if (phone != null && !phone.trim().isEmpty()) {
+                int delaySeconds = sessionManager.getEmergencyCallDelay();
+                handler.postDelayed(() -> {
+                    if (isEmergencyMode) {
+                        makeEmergencyCall(phone);
+                    }
+                }, delaySeconds * 1000L);
+            }
+        }
+    }
+
+    private void makeEmergencyCall(String phone) {
+        if (checkSelfPermission(android.Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
+            try {
+                Intent intent = new Intent(Intent.ACTION_CALL);
+                intent.setData(Uri.parse("tel:" + phone));
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to place call automatically", e);
+            }
+        } else {
+            Log.w(TAG, "CALL_PHONE permission not granted. Cannot place automatic call.");
+        }
     }
 
     @Override
