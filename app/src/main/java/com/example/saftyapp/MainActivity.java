@@ -547,12 +547,47 @@ public class MainActivity extends AppCompatActivity implements EmergencyService.
                 startActivity(intent);
             });
         }
+
+        // Cloud Integration (Optional) Card
+        com.google.android.material.button.MaterialButton btnCloudAction = findViewById(R.id.btnCloudAction);
+        if (btnCloudAction != null) {
+            btnCloudAction.setOnClickListener(v -> {
+                if (sessionManager.isLoggedIn()) {
+                    sessionManager.setLoggedIn(false);
+                    Toast.makeText(MainActivity.this, "Disconnected from Cloud", Toast.LENGTH_SHORT).show();
+                    updateCloudIntegrationUI();
+                } else {
+                    Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+                    startActivity(intent);
+                }
+            });
+        }
+        updateCloudIntegrationUI();
+    }
+
+    private void updateCloudIntegrationUI() {
+        TextView tvCloudStatus = findViewById(R.id.tvCloudStatus);
+        com.google.android.material.button.MaterialButton btnCloudAction = findViewById(R.id.btnCloudAction);
+        if (tvCloudStatus != null && btnCloudAction != null) {
+            if (sessionManager.isLoggedIn()) {
+                tvCloudStatus.setText("Linked to Cloud (Sync enabled)");
+                btnCloudAction.setText("Disconnect Cloud Account");
+                btnCloudAction.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
+                        androidx.core.content.ContextCompat.getColor(this, R.color.panic_red)));
+            } else {
+                tvCloudStatus.setText("Offline Mode (Data saved locally)");
+                btnCloudAction.setText("Link Cloud Account");
+                btnCloudAction.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
+                        androidx.core.content.ContextCompat.getColor(this, R.color.accent_blue)));
+            }
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         updateGpsStatus();
+        updateCloudIntegrationUI();
     }
 
     private void updateGpsStatus() {

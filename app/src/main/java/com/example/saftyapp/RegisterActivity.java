@@ -17,16 +17,30 @@ public class RegisterActivity extends AppCompatActivity {
 
         MaterialButton btnRegister = findViewById(R.id.btnRegister);
         TextView tvLogin = findViewById(R.id.tvLogin);
+        MaterialButton btnContinueOffline = findViewById(R.id.btnContinueOffline);
 
+        SessionManager sessionManager = new SessionManager(this);
         btnRegister.setOnClickListener(v -> {
-            // For now, redirect to dashboard after registration
-            startActivity(new Intent(RegisterActivity.this, MainActivity.class));
-            // Finish all previous activities to prevent going back to register/login
+            sessionManager.setLoggedIn(true);
+            if (sessionManager.isSetupCompleted()) {
+                startActivity(new Intent(RegisterActivity.this, MainActivity.class));
+            } else {
+                startActivity(new Intent(RegisterActivity.this, SetupActivity.class));
+            }
             finishAffinity();
         });
 
         tvLogin.setOnClickListener(v -> {
             finish(); // Go back to login
+        });
+
+        btnContinueOffline.setOnClickListener(v -> {
+            if (sessionManager.isSetupCompleted()) {
+                startActivity(new Intent(RegisterActivity.this, MainActivity.class));
+            } else {
+                startActivity(new Intent(RegisterActivity.this, SetupActivity.class));
+            }
+            finishAffinity();
         });
     }
 }

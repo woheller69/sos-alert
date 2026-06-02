@@ -17,17 +17,30 @@ public class LoginActivity extends AppCompatActivity {
 
         MaterialButton btnLogin = findViewById(R.id.btnLogin);
         TextView tvSignUp = findViewById(R.id.tvSignUp);
+        MaterialButton btnContinueOffline = findViewById(R.id.btnContinueOffline);
 
         SessionManager sessionManager = new SessionManager(this);
         btnLogin.setOnClickListener(v -> {
             sessionManager.setLoggedIn(true);
-            // For now, redirect to dashboard
-            startActivity(new Intent(LoginActivity.this, MainActivity.class));
+            if (sessionManager.isSetupCompleted()) {
+                startActivity(new Intent(LoginActivity.this, MainActivity.class));
+            } else {
+                startActivity(new Intent(LoginActivity.this, SetupActivity.class));
+            }
             finish();
         });
 
         tvSignUp.setOnClickListener(v -> {
             startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
+        });
+
+        btnContinueOffline.setOnClickListener(v -> {
+            if (sessionManager.isSetupCompleted()) {
+                startActivity(new Intent(LoginActivity.this, MainActivity.class));
+            } else {
+                startActivity(new Intent(LoginActivity.this, SetupActivity.class));
+            }
+            finish();
         });
     }
 }

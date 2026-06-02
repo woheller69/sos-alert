@@ -15,7 +15,7 @@ public class LandingActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         
         SessionManager sessionManager = new SessionManager(this);
-        if (sessionManager.isLoggedIn()) {
+        if (sessionManager.isSetupCompleted()) {
             startActivity(new Intent(LandingActivity.this, MainActivity.class));
             finish();
             return;
@@ -25,7 +25,7 @@ public class LandingActivity extends AppCompatActivity {
 
         MaterialButton btnGetStarted = findViewById(R.id.btnGetStarted);
         btnGetStarted.setOnClickListener(v -> {
-            startActivity(new Intent(LandingActivity.this, LoginActivity.class));
+            startActivity(new Intent(LandingActivity.this, SetupActivity.class));
             finish();
         });
     }

@@ -40,6 +40,17 @@ public class SessionManager {
         return prefs.getBoolean(KEY_IS_LOGGED_IN, false);
     }
 
+    private static final String KEY_IS_SETUP_COMPLETED = "isSetupCompleted";
+
+    public void setSetupCompleted(boolean completed) {
+        editor.putBoolean(KEY_IS_SETUP_COMPLETED, completed);
+        editor.apply();
+    }
+
+    public boolean isSetupCompleted() {
+        return prefs.getBoolean(KEY_IS_SETUP_COMPLETED, false);
+    }
+
     public void saveUserName(String name) {
         editor.putString(KEY_USER_NAME, name);
         editor.apply();
