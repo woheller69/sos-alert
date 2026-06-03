@@ -156,7 +156,7 @@ This project is licensed under the **GNU GPL-3.0 License**. See the [LICENSE](LI
 ## 👥 Credits
 
 ### Created and Maintained by
-* **Dhilip M**
+* **Dhilip S**
   * Software Engineering Student
   * Linux User
   * FOSS Activist
