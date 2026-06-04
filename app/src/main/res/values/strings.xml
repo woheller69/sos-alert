@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Guardian Safety</string>
+    <string name="app_name">SOS Alerter</string>
     <string name="panic_text">PANIC</string>
     <string name="cancel_text">CANCEL</string>
     <string name="status_ready">System Ready</string>
