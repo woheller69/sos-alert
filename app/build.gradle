@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace 'com.example.saftyapp'
+    namespace 'org.sosalerter.app'
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.example.saftyapp"
+        applicationId "org.sosalerter.app"
         minSdk 26
         targetSdk 34
         versionCode 1
