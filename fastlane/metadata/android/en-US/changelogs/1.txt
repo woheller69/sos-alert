@@ -1,0 +1,6 @@
+Initial release of SOS Alerter:
+- Privacy-focused emergency assistance.
+- Emergency SMS alerts with high-accuracy GPS location sharing.
+- Silent evidence recording (audio capture and camera photos).
+- Multiple activation triggers: Power button triple-press, shake trigger, voice trigger, and volume buttons.
+- Loud siren and strobe flashlight modes.

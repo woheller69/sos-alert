@@ -27,12 +27,12 @@ Arrange and preview the main screens of SOS Alerter:
 
 | **Welcome & Permissions** | **First-Time Setup** |
 | :---: | :---: |
-| <img src="screenshots/welcome.png" width="300" alt="Welcome Screen"> | <img src="screenshots/setup.png" width="300" alt="First-Time Setup Screen"> |
+| <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/welcome.png" width="300" alt="Welcome Screen"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/setup.png" width="300" alt="First-Time Setup Screen"> |
 | *Welcome Onboarding & Permission Explanation Dialog* | *Primary Contact & Owner Profile Registration* |
 
 | **Home Screen** | **Settings Panel** |
 | :---: | :---: |
-| <img src="screenshots/home.png" width="300" alt="Home Screen"> | <img src="screenshots/settings.png" width="300" alt="Settings Screen"> |
+| <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/home.png" width="300" alt="Home Screen"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/settings.png" width="300" alt="Settings Screen"> |
 | *SOS Button, GPS Tracking Status, and Quick Actions* | *SOS Activation Triggers & Alarm Settings Configuration* |
 
 ---
