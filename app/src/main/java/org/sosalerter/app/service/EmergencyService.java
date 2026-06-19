@@ -19,6 +19,8 @@ import android.hardware.camera2.CameraManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.location.LocationManager;
+import android.location.LocationListener;
 import android.media.AudioManager;
 import android.media.MediaRecorder;
 import android.media.ToneGenerator;
@@ -54,13 +56,6 @@ import org.sosalerter.app.data.db.entity.LocationLog;
 import org.sosalerter.app.data.db.entity.SmsLog;
 import org.sosalerter.app.data.repository.EmergencyRepository;
 import org.sosalerter.app.util.CameraCaptureHelper;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.Priority;
-
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -96,7 +91,7 @@ public class EmergencyService extends Service implements SensorEventListener {
     private String backCameraId;
     private ToneGenerator toneGenerator;
     private MediaRecorder mediaRecorder;
-    private FusedLocationProviderClient locationClient;
+    private LocationManager locationManager;
     private EmergencyRepository repository;
     private SessionManager sessionManager;
 
@@ -141,7 +136,7 @@ public class EmergencyService extends Service implements SensorEventListener {
         super.onCreate();
         repository = new EmergencyRepository(this);
         sessionManager = new SessionManager(this);
-        locationClient = LocationServices.getFusedLocationProviderClient(this);
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
         cameraManager = (CameraManager) getSystemService(CAMERA_SERVICE);
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -288,7 +283,9 @@ public class EmergencyService extends Service implements SensorEventListener {
         lastCapturedLocation = null;
 
         // Stop location updates
-        locationClient.removeLocationUpdates(locationCallback);
+        if (locationManager != null && locationListener != null) {
+            locationManager.removeUpdates(locationListener);
+        }
 
         if (listener != null) {
             listener.onEmergencyStateChanged(false, false);
@@ -731,17 +728,39 @@ public class EmergencyService extends Service implements SensorEventListener {
             Log.w(TAG, "Location permissions not granted. Cannot start location tracking.");
             return;
         }
-        LocationRequest request = new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 30000)
-                .setMinUpdateIntervalMillis(15000)
-                .build();
 
-        locationClient.requestLocationUpdates(request, locationCallback, Looper.getMainLooper());
+        try {
+            if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                locationManager.requestLocationUpdates(
+                        LocationManager.GPS_PROVIDER,
+                        30000,
+                        0,
+                        locationListener,
+                        Looper.getMainLooper()
+                );
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to request location updates from GPS provider", e);
+        }
+
+        try {
+            if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+                locationManager.requestLocationUpdates(
+                        LocationManager.NETWORK_PROVIDER,
+                        30000,
+                        0,
+                        locationListener,
+                        Looper.getMainLooper()
+                );
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to request location updates from Network provider", e);
+        }
     }
 
-    private final LocationCallback locationCallback = new LocationCallback() {
+    private final LocationListener locationListener = new LocationListener() {
         @Override
-        public void onLocationResult(@NonNull LocationResult locationResult) {
-            Location location = locationResult.getLastLocation();
+        public void onLocationChanged(@NonNull Location location) {
             if (location != null && currentSessionId != -1) {
                 lastCapturedLocation = location;
                 saveLocationLog(location);
@@ -754,7 +773,46 @@ public class EmergencyService extends Service implements SensorEventListener {
                 }
             }
         }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {}
+
+        @Override
+        public void onProviderEnabled(@NonNull String provider) {}
+
+        @Override
+        public void onProviderDisabled(@NonNull String provider) {}
     };
+
+    @SuppressLint("MissingPermission")
+    private Location getBestLastKnownLocation() {
+        Location bestLocation = null;
+        try {
+            Location gpsLocation = null;
+            Location netLocation = null;
+            if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                gpsLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            }
+            if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+                netLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+            }
+            
+            if (gpsLocation != null && netLocation != null) {
+                if (gpsLocation.getTime() > netLocation.getTime()) {
+                    bestLocation = gpsLocation;
+                } else {
+                    bestLocation = netLocation;
+                }
+            } else if (gpsLocation != null) {
+                bestLocation = gpsLocation;
+            } else if (netLocation != null) {
+                bestLocation = netLocation;
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to get last known location", e);
+        }
+        return bestLocation;
+    }
 
     private void saveLocationLog(Location location) {
         String address = getAddressFromLatLng(location.getLatitude(), location.getLongitude());
@@ -1133,35 +1191,52 @@ public class EmergencyService extends Service implements SensorEventListener {
             triggerCallIfEnabled();
             return;
         }
-        locationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
-                .addOnSuccessListener(location -> {
-                    if (location != null) {
-                        sendInitialSMS(location);
-                    } else {
-                        locationClient.getLastLocation().addOnSuccessListener(lastLoc -> {
-                            if (lastLoc != null) {
-                                sendInitialSMS(lastLoc);
-                            } else {
-                                sendFallbackSMS();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            try {
+                String provider = null;
+                if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                    provider = LocationManager.GPS_PROVIDER;
+                } else if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+                    provider = LocationManager.NETWORK_PROVIDER;
+                }
+
+                if (provider != null) {
+                    android.os.CancellationSignal cancellationSignal = new android.os.CancellationSignal();
+                    locationManager.getCurrentLocation(
+                            provider,
+                            cancellationSignal,
+                            ContextCompat.getMainExecutor(this),
+                            location -> {
+                                if (location != null) {
+                                    lastCapturedLocation = location;
+                                    sendInitialSMS(location);
+                                } else {
+                                    fallbackToLastKnownLocation();
+                                }
+                                triggerCallIfEnabled();
                             }
-                        }).addOnFailureListener(e -> sendFallbackSMS());
-                    }
-                    triggerCallIfEnabled();
-                })
-                .addOnFailureListener(e -> {
-                    try {
-                        locationClient.getLastLocation().addOnSuccessListener(lastLoc -> {
-                            if (lastLoc != null) {
-                                sendInitialSMS(lastLoc);
-                            } else {
-                                sendFallbackSMS();
-                            }
-                        }).addOnFailureListener(err -> sendFallbackSMS());
-                    } catch (Exception ex) {
-                        sendFallbackSMS();
-                    }
-                    triggerCallIfEnabled();
-                });
+                    );
+                    return;
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to get current location using getCurrentLocation API 30+", e);
+            }
+        }
+
+        fallbackToLastKnownLocation();
+        triggerCallIfEnabled();
+    }
+
+    @SuppressLint("MissingPermission")
+    private void fallbackToLastKnownLocation() {
+        Location bestLoc = getBestLastKnownLocation();
+        if (bestLoc != null) {
+            lastCapturedLocation = bestLoc;
+            sendInitialSMS(bestLoc);
+        } else {
+            sendFallbackSMS();
+        }
     }
 
     private void triggerCallIfEnabled() {
