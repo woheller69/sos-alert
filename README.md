@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/icon.png" width="160" height="160" alt="SOS Alerter Icon">
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/i.png" width="160" height="160" alt="SOS Alerter Icon">
 </p>
 
 <h1 align="center">SOS Alerter</h1>
