@@ -1,4 +1,5 @@
 Initial release of SOS Alerter:
+version 1.0.0-beta1
 - Privacy-focused emergency assistance.
 - Emergency SMS alerts with high-accuracy GPS location sharing.
 - Silent evidence recording (audio capture and camera photos).
