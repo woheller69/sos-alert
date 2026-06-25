@@ -13,6 +13,16 @@
 </p>
 
 <p align="center">
+  <a href="https://f-droid.org/packages/org.sosalerter.app">
+    <img
+      src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
+      alt="Get it on F-Droid"
+      width="220">
+  </a>
+
+</p>
+
+<p align="center">
   <a href="https://github.com/dhilipmpms/SOS-alerter/releases"><img src="https://img.shields.io/github/v/release/dhilipmpms/SOS-alerter?style=flat-square&color=blue" alt="Latest Release"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-GPL--3.0-green.svg?style=flat-square" alt="License"></a>
   <img src="https://img.shields.io/badge/Platform-Android-00C853?style=flat-square" alt="Platform">
