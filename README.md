@@ -48,7 +48,7 @@ Arrange and preview the main screens of SOS Alerter:
 | **Timeline & History** | **Permissions** |
 | :---: | :---: |
 | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/timeline.png" width="300" alt="Timeline and History"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/permissions.png" width="300" alt="Permissions"> |
-| *Review past emergency sessions and captured evidence* | *Grant required permissions securely* |
+| *Review past emergency sessions and captured evidence* | *Displaying and Grant required permissions securely* |
 
 ---
 
