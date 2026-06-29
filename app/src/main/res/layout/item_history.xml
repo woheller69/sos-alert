@@ -123,6 +123,7 @@
                 android:textStyle="bold" />
 
             <LinearLayout
+                android:id="@+id/layoutPhotosSection"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
@@ -202,6 +203,16 @@
                     </FrameLayout>
                 </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
+
+            <TextView
+                android:id="@+id/tvEmptyEvidenceState"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="No evidence captured (Camera/Mic permission denied or storage unavailable)."
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp"
+                android:visibility="gone" />
 
             <!-- Audio Recording Section -->
             <com.google.android.material.card.MaterialCardView

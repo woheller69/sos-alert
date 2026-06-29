@@ -46,12 +46,15 @@ public class CameraCaptureHelper {
         void onError(String message);
     }
 
+    private String filePrefix = "";
+
     public CameraCaptureHelper(Context context) {
         this.context = context.getApplicationContext();
         this.cameraManager = (CameraManager) this.context.getSystemService(Context.CAMERA_SERVICE);
     }
 
-    public void capturePhotos(CameraCaptureCallback callback) {
+    public void capturePhotos(String filePrefix, CameraCaptureCallback callback) {
+        this.filePrefix = filePrefix != null ? filePrefix : "";
         this.callback = callback;
         this.timestamp = System.currentTimeMillis();
         startCameraThread();
@@ -110,8 +113,8 @@ public class CameraCaptureHelper {
                 }
             }, cameraHandler);
 
-        } catch (CameraAccessException e) {
-            Log.e(TAG, "Access exception when opening camera", e);
+        } catch (Exception e) {
+            Log.e(TAG, "Exception when opening camera", e);
             handleCameraFinished(lensFacing, null);
         }
     }
@@ -135,6 +138,9 @@ public class CameraCaptureHelper {
                         if (!dir.exists()) dir.mkdirs();
                         
                         String prefix = (lensFacing == CameraCharacteristics.LENS_FACING_FRONT) ? "front" : "rear";
+                        if (!filePrefix.isEmpty()) {
+                            prefix = prefix + "_" + filePrefix;
+                        }
                         photoFile = new File(dir, prefix + "_" + timestamp + ".jpg");
                         try (FileOutputStream fos = new FileOutputStream(photoFile)) {
                             fos.write(bytes);
@@ -158,7 +164,7 @@ public class CameraCaptureHelper {
                         builder.addTarget(imageReader.getSurface());
                         builder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_AUTO);
                         session.capture(builder.build(), null, cameraHandler);
-                    } catch (CameraAccessException e) {
+                    } catch (Exception e) {
                         Log.e(TAG, "Capture exception", e);
                         closeCameraQuietly();
                         handleCameraFinished(lensFacing, null);
@@ -172,7 +178,7 @@ public class CameraCaptureHelper {
                 }
             }, cameraHandler);
 
-        } catch (CameraAccessException e) {
+        } catch (Exception e) {
             Log.e(TAG, "Setup exception", e);
             closeCameraQuietly();
             handleCameraFinished(lensFacing, null);

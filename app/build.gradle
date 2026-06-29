@@ -43,6 +43,10 @@ android {
     }
 
     buildTypes {
+        debug {
+            applicationIdSuffix ".debug"
+            debuggable true
+        }
         release {
             if (keystorePropertiesFile.exists()) {
             signingConfig signingConfigs.release

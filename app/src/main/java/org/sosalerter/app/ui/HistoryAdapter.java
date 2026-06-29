@@ -12,6 +12,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Collections;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -107,13 +109,52 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.HistoryV
             String statsStr = "Duration of Emergency: " + duration + " seconds";
             holder.tvDuration.setText(statsStr);
 
-            // Load Front Photo
-            loadPhoto(session.getFrontPhotoPath(), holder.ivFrontPhoto);
-            // Load Rear Photo
-            loadPhoto(session.getRearPhotoPath(), holder.ivRearPhoto);
+            // Load Front Photos
+            List<String> frontPhotos = getPhotosForSession(holder.itemView.getContext(), session.getId(), true);
+            if (frontPhotos.isEmpty() && session.getFrontPhotoPath() != null && !session.getFrontPhotoPath().isEmpty() && new File(session.getFrontPhotoPath()).exists()) {
+                frontPhotos.add(session.getFrontPhotoPath());
+            }
 
-            // Audio Controls
-            if (session.getAudioPath() != null && !session.getAudioPath().isEmpty() && new File(session.getAudioPath()).exists()) {
+            // Load Rear Photos
+            List<String> rearPhotos = getPhotosForSession(holder.itemView.getContext(), session.getId(), false);
+            if (rearPhotos.isEmpty() && session.getRearPhotoPath() != null && !session.getRearPhotoPath().isEmpty() && new File(session.getRearPhotoPath()).exists()) {
+                rearPhotos.add(session.getRearPhotoPath());
+            }
+
+            if (!frontPhotos.isEmpty()) {
+                final int[] frontIndex = {0};
+                loadPhoto(frontPhotos.get(frontIndex[0]), holder.ivFrontPhoto);
+                holder.ivFrontPhoto.setOnClickListener(v -> {
+                    frontIndex[0] = (frontIndex[0] + 1) % frontPhotos.size();
+                    loadPhoto(frontPhotos.get(frontIndex[0]), holder.ivFrontPhoto);
+                    Toast.makeText(v.getContext(), "Front Photo " + (frontIndex[0] + 1) + "/" + frontPhotos.size(), Toast.LENGTH_SHORT).show();
+                });
+            } else {
+                loadPhoto(null, holder.ivFrontPhoto);
+                holder.ivFrontPhoto.setOnClickListener(null);
+            }
+
+            if (!rearPhotos.isEmpty()) {
+                final int[] rearIndex = {0};
+                loadPhoto(rearPhotos.get(rearIndex[0]), holder.ivRearPhoto);
+                holder.ivRearPhoto.setOnClickListener(v -> {
+                    rearIndex[0] = (rearIndex[0] + 1) % rearPhotos.size();
+                    loadPhoto(rearPhotos.get(rearIndex[0]), holder.ivRearPhoto);
+                    Toast.makeText(v.getContext(), "Rear Photo " + (rearIndex[0] + 1) + "/" + rearPhotos.size(), Toast.LENGTH_SHORT).show();
+                });
+            } else {
+                loadPhoto(null, holder.ivRearPhoto);
+                holder.ivRearPhoto.setOnClickListener(null);
+            }
+
+            boolean hasPhotos = !frontPhotos.isEmpty() || !rearPhotos.isEmpty();
+            boolean hasAudio = session.getAudioPath() != null && !session.getAudioPath().isEmpty() && new File(session.getAudioPath()).exists();
+
+            if (holder.layoutPhotosSection != null) {
+                holder.layoutPhotosSection.setVisibility(hasPhotos ? View.VISIBLE : View.GONE);
+            }
+
+            if (hasAudio) {
                 holder.layoutAudioSection.setVisibility(View.VISIBLE);
                 
                 // Set play/pause icon based on whether it is playing
@@ -134,6 +175,10 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.HistoryV
                 });
             } else {
                 holder.layoutAudioSection.setVisibility(View.GONE);
+            }
+
+            if (holder.tvEmptyEvidenceState != null) {
+                holder.tvEmptyEvidenceState.setVisibility((!hasPhotos && !hasAudio) ? View.VISIBLE : View.GONE);
             }
 
             // Load and build Location and SMS history timeline
@@ -210,6 +255,24 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.HistoryV
         }
     }
 
+    private List<String> getPhotosForSession(android.content.Context context, int sessionId, boolean isFront) {
+        List<String> list = new ArrayList<>();
+        File dir = new File(context.getFilesDir(), "evidence");
+        if (dir.exists() && dir.isDirectory()) {
+            File[] files = dir.listFiles();
+            if (files != null) {
+                String prefix = (isFront ? "front" : "rear") + "_session_" + sessionId + "_";
+                for (File f : files) {
+                    if (f.getName().startsWith(prefix) && f.getName().endsWith(".jpg")) {
+                        list.add(f.getAbsolutePath());
+                    }
+                }
+            }
+        }
+        Collections.sort(list);
+        return list;
+    }
+
     private void stopPlayback() {
         if (mediaPlayer != null) {
             try {
@@ -247,6 +310,8 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.HistoryV
         final TextView tvDuration;
         final ImageView ivFrontPhoto;
         final ImageView ivRearPhoto;
+        final View layoutPhotosSection;
+        final TextView tvEmptyEvidenceState;
         
         final View layoutAudioSection;
         final ImageButton btnPlayAudio;
@@ -264,6 +329,8 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.HistoryV
             tvDuration = itemView.findViewById(R.id.tvSessionDuration);
             ivFrontPhoto = itemView.findViewById(R.id.ivFrontPhoto);
             ivRearPhoto = itemView.findViewById(R.id.ivRearPhoto);
+            layoutPhotosSection = itemView.findViewById(R.id.layoutPhotosSection);
+            tvEmptyEvidenceState = itemView.findViewById(R.id.tvEmptyEvidenceState);
             
             layoutAudioSection = itemView.findViewById(R.id.layoutAudioSection);
             btnPlayAudio = itemView.findViewById(R.id.btnPlayAudio);
