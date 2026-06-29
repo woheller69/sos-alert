@@ -14,7 +14,7 @@ import android.text.TextWatcher;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.widget.CheckBox;
+import com.google.android.material.materialswitch.MaterialSwitch;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.RadioGroup;
@@ -93,9 +93,9 @@ public class MainActivity extends AppCompatActivity implements EmergencyService.
 
     // Settings Panel UI
     private EditText etUserNameSetting, etMessageSetting, etSmsInterval;
-    private CheckBox cbPowerTriple, cbLongPress, cbVolumeCombo, cbShakeTrigger, cbVoiceTrigger;
+    private MaterialSwitch cbPowerTriple, cbLongPress, cbVolumeCombo, cbShakeTrigger, cbVoiceTrigger;
     private RadioGroup rgAlertVolume;
-    private CheckBox cbSiren, cbFlashlight;
+    private MaterialSwitch cbSiren, cbFlashlight;
     private EditText etNewContactName, etNewContactPhone;
     private EditText etNewContactPriority;
     private MaterialButton btnAddContact, btnImportContact;
@@ -470,7 +470,7 @@ public class MainActivity extends AppCompatActivity implements EmergencyService.
                         if (etNewContactName != null) etNewContactName.setText("");
                         if (etNewContactPhone != null) etNewContactPhone.setText("");
                         if (etNewContactPriority != null) etNewContactPriority.setText("");
-                        if (btnAddContact != null) btnAddContact.setIcon(ContextCompat.getDrawable(this, android.R.drawable.ic_menu_add));
+                        if (btnAddContact != null) btnAddContact.setIcon(ContextCompat.getDrawable(this, R.drawable.ic_add));
                     }
                 },
                 contact -> {
@@ -478,7 +478,7 @@ public class MainActivity extends AppCompatActivity implements EmergencyService.
                     if (etNewContactName != null) etNewContactName.setText(contact.getName());
                     if (etNewContactPhone != null) etNewContactPhone.setText(contact.getPhoneNumber());
                     if (etNewContactPriority != null) etNewContactPriority.setText(String.valueOf(contact.getPriority()));
-                    if (btnAddContact != null) btnAddContact.setIcon(ContextCompat.getDrawable(this, android.R.drawable.ic_menu_save));
+                    if (btnAddContact != null) btnAddContact.setIcon(ContextCompat.getDrawable(this, R.drawable.ic_shield));
                     Toast.makeText(this, "Editing contact: " + contact.getName(), Toast.LENGTH_SHORT).show();
                 }
             );
@@ -548,7 +548,7 @@ public class MainActivity extends AppCompatActivity implements EmergencyService.
                 contact.setId(editingContactId);
                 viewModel.updateContact(contact);
                 editingContactId = -1;
-                btnAddContact.setIcon(ContextCompat.getDrawable(this, android.R.drawable.ic_menu_add));
+                btnAddContact.setIcon(ContextCompat.getDrawable(this, R.drawable.ic_add));
                 Toast.makeText(this, "Contact updated successfully", Toast.LENGTH_SHORT).show();
             } else {
                 Contact contact = new Contact(name, phone, priority);
@@ -586,7 +586,7 @@ public class MainActivity extends AppCompatActivity implements EmergencyService.
         }
 
         // Emergency Calling controls setup
-        CheckBox cbEnableCalling = findViewById(R.id.cbEnableCalling);
+        MaterialSwitch cbEnableCalling = findViewById(R.id.cbEnableCalling);
         Spinner spCallingContact = findViewById(R.id.spCallingContact);
         Spinner spCallingDelay = findViewById(R.id.spCallingDelay);
 
@@ -705,7 +705,7 @@ public class MainActivity extends AppCompatActivity implements EmergencyService.
         super.onResume();
         updateGpsStatus();
         
-        CheckBox cbEnableCalling = findViewById(R.id.cbEnableCalling);
+        MaterialSwitch cbEnableCalling = findViewById(R.id.cbEnableCalling);
         if (cbEnableCalling != null) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
                 cbEnableCalling.setChecked(false);
@@ -896,7 +896,7 @@ public class MainActivity extends AppCompatActivity implements EmergencyService.
                 Toast.makeText(this, "Read contacts permission denied", Toast.LENGTH_SHORT).show();
             }
         } else if (requestCode == 102) {
-            CheckBox cbEnableCalling = findViewById(R.id.cbEnableCalling);
+            MaterialSwitch cbEnableCalling = findViewById(R.id.cbEnableCalling);
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 sessionManager.setEmergencyCallingEnabled(true);
                 if (cbEnableCalling != null) cbEnableCalling.setChecked(true);

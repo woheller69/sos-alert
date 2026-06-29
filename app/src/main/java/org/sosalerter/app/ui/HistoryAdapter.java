@@ -118,9 +118,9 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.HistoryV
                 
                 // Set play/pause icon based on whether it is playing
                 if (playingPosition == position) {
-                    holder.btnPlayAudio.setImageResource(android.R.drawable.ic_media_pause);
+                    holder.btnPlayAudio.setImageResource(R.drawable.ic_pause);
                 } else {
-                    holder.btnPlayAudio.setImageResource(android.R.drawable.ic_media_play);
+                    holder.btnPlayAudio.setImageResource(R.drawable.ic_play);
                 }
                 
                 holder.btnPlayAudio.setOnClickListener(v -> {
@@ -203,7 +203,7 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.HistoryV
             
             playingPosition = position;
             currentPlayButton = playButton;
-            playButton.setImageResource(android.R.drawable.ic_media_pause);
+            playButton.setImageResource(R.drawable.ic_pause);
         } catch (Exception e) {
             Toast.makeText(playButton.getContext(), "Playback failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             stopPlayback();
@@ -220,7 +220,7 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.HistoryV
         }
         
         if (currentPlayButton != null) {
-            currentPlayButton.setImageResource(android.R.drawable.ic_media_play);
+            currentPlayButton.setImageResource(R.drawable.ic_play);
             currentPlayButton = null;
         }
         
