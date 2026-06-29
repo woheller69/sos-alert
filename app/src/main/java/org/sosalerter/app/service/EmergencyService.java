@@ -110,6 +110,16 @@ public class EmergencyService extends Service implements SensorEventListener {
     private Runnable sirenRunnable;
     private boolean strobeState = false;
 
+    private final Runnable photoCaptureRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (isEmergencyMode && isCountdownCompleted) {
+                captureEvidencePhotos();
+                handler.postDelayed(this, 10000);
+            }
+        }
+    };
+
     // Current emergency records
     private int currentSessionId = -1;
     private String currentAudioPath = "";
@@ -253,19 +263,24 @@ public class EmergencyService extends Service implements SensorEventListener {
         stopStrobeFlashlight();
         stopVibration();
         stopAudioRecording();
+        handler.removeCallbacks(photoCaptureRunnable);
 
         // Save session if completed or resolution
         if (isCountdownCompleted && currentSessionId != -1) {
             long endTime = System.currentTimeMillis();
             long duration = (endTime - emergencyStartTime) / 1000;
             
+            final String finalAudioPath = currentAudioPath;
+            final String finalFrontPhoto = currentFrontPhotoPath;
+            final String finalRearPhoto = currentRearPhotoPath;
+            
             repository.getSessionDetails(currentSessionId, (session, locations, smsLogs) -> {
                 if (session != null) {
                     session.setEndTime(endTime);
                     session.setDuration(duration);
-                    session.setAudioPath(currentAudioPath);
-                    session.setFrontPhotoPath(currentFrontPhotoPath);
-                    session.setRearPhotoPath(currentRearPhotoPath);
+                    session.setAudioPath(finalAudioPath);
+                    session.setFrontPhotoPath(finalFrontPhoto);
+                    session.setRearPhotoPath(finalRearPhoto);
                     session.setResolved(true);
                     repository.updateSession(session);
                 }
@@ -696,7 +711,7 @@ public class EmergencyService extends Service implements SensorEventListener {
             handler.post(this::startAudioRecording);
 
             // 4. Capture Photos
-            handler.post(this::captureEvidencePhotos);
+            handler.post(photoCaptureRunnable);
 
             // 5. Trigger location-based initial SMS dispatch
             handler.post(this::startEmergencyAfterLocationAvailable);
@@ -870,6 +885,13 @@ public class EmergencyService extends Service implements SensorEventListener {
             mediaRecorder.start();
         } catch (Exception e) {
             Log.e(TAG, "Failed to start audio recording", e);
+            if (mediaRecorder != null) {
+                try {
+                    mediaRecorder.release();
+                } catch (Exception ignored) {}
+                mediaRecorder = null;
+            }
+            currentAudioPath = "";
         }
     }
 
@@ -895,7 +917,7 @@ public class EmergencyService extends Service implements SensorEventListener {
         stopStrobeFlashlight();
         
         CameraCaptureHelper cameraHelper = new CameraCaptureHelper(this);
-        cameraHelper.capturePhotos(new CameraCaptureHelper.CameraCaptureCallback() {
+        cameraHelper.capturePhotos("session_" + currentSessionId, new CameraCaptureHelper.CameraCaptureCallback() {
             @Override
             public void onCaptured(String frontPhotoPath, String rearPhotoPath) {
                 currentFrontPhotoPath = frontPhotoPath;
