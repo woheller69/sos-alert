@@ -38,17 +38,17 @@ Arrange and preview the main screens of SOS Alerter:
 | **First-Time Setup** | **Home Screen** |
 | :---: | :---: |
 | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/setup.png" width="300" alt="First Time Setup"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/home.png" width="300" alt="Home Screen"> |
-| *Set up your emergency profile* | *nstant SOS and quick actions* |
+| *Quickly configure your emergency profile and primary contact* | *One-tap SOS activation with GPS status and quick actions.* |
 
 | **Settings** | **Emergency Contacts** |
 | :---: | :---: |
 | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/settings.png" width="300" alt="Settings"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/contacts.png" width="300" alt="Emergency Contacts"> |
-| *SOS Button, GPS Tracking Status, and Quick Actions* | *Manage trusted contacts* |
+| *Customize SOS triggers, alerts, and emergency response settings* | *Manage trusted contacts and emergency calling preferences* |
 
 | **Timeline & History** | **Permissions** |
 | :---: | :---: |
 | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/timeline.png" width="300" alt="Timeline and History"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/permissions.png" width="300" alt="Permissions"> |
-| *Review past emergency sessions and captured evidence* | *Grant required permissions securely* |
+| *Review past emergency sessions and captured evidence* | *Android permission prompts displayed only when required for emergency features* |
 
 ---
 
