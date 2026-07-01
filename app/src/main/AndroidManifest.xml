@@ -3,45 +3,21 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-feature
+        android:name="android.hardware.telephony"
+        android:required="false" />
     <uses-permission
     android:name="android.permission.ACCESS_NETWORK_STATE"
     tools:node="remove" />
 
     <!-- SMS Permissions -->
-    <uses-permission android:name="android.permission.SEND_SMS" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.CALL_PHONE" />
-
-    <!-- Audio & Hardware -->
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
-
-    <!-- Location Permissions -->
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-
-    <!-- Notification Permissions (Android 13+) -->
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-
-    <!-- Foreground Service Permissions (Android 9+) -->
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <!-- Android 14+ Foreground Service Types -->
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
-
-    <!-- Startup Permission -->
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.READ_CONTACTS" />
 
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_guardian"
-        android:label="SOS Alerter"
+        android:label="@string/app_name"
         android:roundIcon="@drawable/ic_guardian"
         android:supportsRtl="true"
         android:theme="@style/Theme.SosAlerter">
@@ -53,21 +29,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".LoginActivity" />
-        <activity android:name=".RegisterActivity" />
         <activity android:name=".SetupActivity" />
         <activity android:name=".MainActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustPan" />
-        <activity android:name=".AboutActivity"
-            android:theme="@style/Theme.SosAlerter.About" />
-
-        <!-- Foreground Emergency Service -->
-        <service
-            android:name=".service.EmergencyService"
-            android:enabled="true"
-            android:exported="false"
-            android:foregroundServiceType="location|camera|microphone" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

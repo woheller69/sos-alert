@@ -1,30 +1,23 @@
 package org.sosalerter.app;
 
 import android.Manifest;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
+
 import com.google.android.material.materialswitch.MaterialSwitch;
+
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.Spinner;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -34,9 +27,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import org.sosalerter.app.data.db.entity.Contact;
 import org.sosalerter.app.data.repository.EmergencyRepository;
-import org.sosalerter.app.service.EmergencyService;
 import org.sosalerter.app.ui.ContactsAdapter;
-import org.sosalerter.app.ui.HistoryAdapter;
 import org.sosalerter.app.ui.MainViewModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.button.MaterialButton;
@@ -44,15 +35,16 @@ import com.google.android.material.button.MaterialButton;
 import android.database.Cursor;
 import android.provider.ContactsContract;
 import android.net.Uri;
-import android.location.LocationManager;
+
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity implements EmergencyService.ServiceListener {
+public class MainActivity extends AppCompatActivity {
 
+    private static final String TAG = "MainActivity";
     private static final int PERMISSIONS_REQUEST_CODE = 999;
     private static final int CONTACT_PICK_REQUEST_CODE = 888;
 
@@ -60,7 +52,6 @@ public class MainActivity extends AppCompatActivity implements EmergencyService.
     private SessionManager sessionManager;
 
     // Service binding
-    private EmergencyService emergencyService;
     private boolean isBound = false;
 
     // UI Panels
@@ -84,21 +75,13 @@ public class MainActivity extends AppCompatActivity implements EmergencyService.
     private View layoutPrimaryContactEdit;
     private EditText etPrimaryName, etPrimaryPhone;
     private MaterialButton btnEditPrimary, btnSavePrimary;
-    private TextView tvGpsStatus, tvLastEmergency;
+    private TextView tvLastEmergency;
     private MaterialButton btnQuickAddContact, btnQuickHistory, btnQuickSettings;
 
-    // History Panel UI
-    private RecyclerView rvHistory;
-    private HistoryAdapter historyAdapter;
-
     // Settings Panel UI
-    private EditText etUserNameSetting, etMessageSetting, etSmsInterval;
-    private MaterialSwitch cbPowerTriple, cbLongPress, cbVolumeCombo, cbShakeTrigger, cbVoiceTrigger;
-    private RadioGroup rgAlertVolume;
-    private MaterialSwitch cbSiren, cbFlashlight;
+    private EditText etUserNameSetting;
     private EditText etNewContactName, etNewContactPhone;
     private EditText etNewContactPriority;
-    private MaterialButton btnAddContact, btnImportContact;
     private RecyclerView rvContacts;
     private ContactsAdapter contactsAdapter;
 
@@ -106,21 +89,6 @@ public class MainActivity extends AppCompatActivity implements EmergencyService.
     private Contact currentPrimaryContact;
     private int editingContactId = -1;
 
-    private final ServiceConnection serviceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            EmergencyService.LocalBinder binder = (EmergencyService.LocalBinder) service;
-            emergencyService = binder.getService();
-            isBound = true;
-            emergencyService.setListener(MainActivity.this);
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            isBound = false;
-            emergencyService = null;
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -130,15 +98,9 @@ public class MainActivity extends AppCompatActivity implements EmergencyService.
         sessionManager = new SessionManager(this);
         viewModel = new ViewModelProvider(this).get(MainViewModel.class);
 
-        // Bind Foreground Service
-        Intent serviceIntent = new Intent(this, EmergencyService.class);
-        startService(serviceIntent); // Ensure service lives independently
-        bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
-
         initializeUI();
         setupNavigation();
         setupSosPanel();
-        setupHistoryPanel();
         setupSettingsPanel();
     }
 
@@ -147,18 +109,14 @@ public class MainActivity extends AppCompatActivity implements EmergencyService.
         panelSos = findViewById(R.id.panel_sos);
         panelHistory = findViewById(R.id.panel_history);
         panelSettings = findViewById(R.id.panel_settings);
-        bottomNavigation = findViewById(R.id.bottom_navigation);
 
         // SOS tab UI
         btnPanicContainer = findViewById(R.id.btnPanicContainer);
         panicRipple = findViewById(R.id.panic_ripple);
         tvPanicTitle = findViewById(R.id.tvPanicTitle);
         tvPanicSubtitle = findViewById(R.id.tvPanicSubtitle);
-        tvStatus = findViewById(R.id.tvStatus);
         tvTimer = findViewById(R.id.tvTimer);
         panicProgress = findViewById(R.id.panic_progress);
-        btnCancel = findViewById(R.id.btnCancel);
-        btnSafe = findViewById(R.id.btnSafe);
         cardActiveTracking = findViewById(R.id.cardActiveTracking);
 
         // New SOS Panel UI elements
@@ -168,35 +126,13 @@ public class MainActivity extends AppCompatActivity implements EmergencyService.
         etPrimaryPhone = findViewById(R.id.etPrimaryPhone);
         btnEditPrimary = findViewById(R.id.btnEditPrimary);
         btnSavePrimary = findViewById(R.id.btnSavePrimary);
-        tvGpsStatus = findViewById(R.id.tvGpsStatus);
-        tvLastEmergency = findViewById(R.id.tvLastEmergency);
-        btnQuickAddContact = findViewById(R.id.btnQuickAddContact);
-        btnQuickHistory = findViewById(R.id.btnQuickHistory);
-        btnQuickSettings = findViewById(R.id.btnQuickSettings);
-
-        // History tab UI
-        rvHistory = findViewById(R.id.rvHistory);
 
         // Settings tab UI
         etUserNameSetting = findViewById(R.id.etUserNameSetting);
-        etMessageSetting = findViewById(R.id.etMessageSetting);
-        etSmsInterval = findViewById(R.id.etSmsInterval);
-
-        cbPowerTriple = findViewById(R.id.cbPowerTriple);
-        cbLongPress = findViewById(R.id.cbLongPress);
-        cbVolumeCombo = findViewById(R.id.cbVolumeCombo);
-        cbShakeTrigger = findViewById(R.id.cbShakeTrigger);
-        cbVoiceTrigger = findViewById(R.id.cbVoiceTrigger);
-
-        rgAlertVolume = findViewById(R.id.rgAlertVolume);
-        cbSiren = findViewById(R.id.cbSiren);
-        cbFlashlight = findViewById(R.id.cbFlashlight);
 
         etNewContactName = findViewById(R.id.etNewContactName);
         etNewContactPhone = findViewById(R.id.etNewContactPhone);
         etNewContactPriority = findViewById(R.id.etNewContactPriority);
-        btnAddContact = findViewById(R.id.btnAddContact);
-        btnImportContact = findViewById(R.id.btnImportContact);
         rvContacts = findViewById(R.id.rvContacts);
     }
 
@@ -210,59 +146,40 @@ public class MainActivity extends AppCompatActivity implements EmergencyService.
                 if (panelHistory != null) panelHistory.setVisibility(View.GONE);
                 if (panelSettings != null) panelSettings.setVisibility(View.GONE);
                 return true;
-            } else if (id == R.id.nav_history) {
-                if (panelSos != null) panelSos.setVisibility(View.GONE);
-                if (panelHistory != null) panelHistory.setVisibility(View.VISIBLE);
-                if (panelSettings != null) panelSettings.setVisibility(View.GONE);
-                return true;
             } else if (id == R.id.nav_settings) {
                 if (panelSos != null) panelSos.setVisibility(View.GONE);
                 if (panelHistory != null) panelHistory.setVisibility(View.GONE);
                 if (panelSettings != null) panelSettings.setVisibility(View.VISIBLE);
                 return true;
-            } else if (id == R.id.nav_about) {
-                Intent intent = new Intent(MainActivity.this, AboutActivity.class);
-                startActivity(intent);
-                return false;
             }
             return false;
         });
     }
 
+    private void triggerCallIfEnabled() {
+        String phone = sessionManager.getEmergencyCallPhone();
+        makeEmergencyCall(phone);
+    }
+
+    private void makeEmergencyCall(String phone) {
+        if (checkSelfPermission(android.Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
+            try {
+                Intent intent = new Intent(Intent.ACTION_CALL);
+                intent.setData(Uri.parse("tel:" + phone));
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to place call automatically", e);
+            }
+        } else {
+            Log.w(TAG, "CALL_PHONE permission not granted. Cannot place automatic call.");
+        }
+    }
     // SOS BUTTON WORKFLOW
     private void setupSosPanel() {
         // Main tap activation
         btnPanicContainer.setOnClickListener(v -> {
-            if (isBound) {
-                if (sessionManager.isTriggerLongPress()) {
-                    Toast.makeText(this, "Trigger configured via Long Press!", Toast.LENGTH_SHORT).show();
-                } else {
-                    emergencyService.startEmergency("SOS Button");
-                }
-            }
-        });
-
-        // Optional long press activation
-        btnPanicContainer.setOnLongClickListener(v -> {
-            if (sessionManager.isTriggerLongPress() && isBound) {
-                emergencyService.startEmergency("Long Press SOS Button");
-                return true;
-            }
-            return false;
-        });
-
-        // Cancel Active countdown
-        btnCancel.setOnClickListener(v -> {
-            if (isBound) {
-                emergencyService.stopEmergency();
-            }
-        });
-
-        // Resolve Safe button
-        btnSafe.setOnClickListener(v -> {
-            if (isBound) {
-                emergencyService.stopEmergency();
-            }
+            triggerCallIfEnabled();
         });
 
         // Edit Primary Contact
@@ -312,51 +229,13 @@ public class MainActivity extends AppCompatActivity implements EmergencyService.
         });
 
         // Observe latest session for timestamp
-        viewModel.getLatestSession().observe(this, session -> {
-            if (session != null) {
-                String time = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date(session.getStartTime()));
-                tvLastEmergency.setText("Last SOS Triggered: " + time + " (" + session.getTriggerType() + ")");
-            } else {
-                tvLastEmergency.setText("Last SOS Triggered: Never");
-            }
-        });
+        viewModel.getLatestSession().observe(this, session -> {});
 
-        // Quick Access Actions
-        btnQuickAddContact.setOnClickListener(v -> {
-            bottomNavigation.setSelectedItemId(R.id.nav_settings);
-            etNewContactName.requestFocus();
-        });
-
-        btnQuickHistory.setOnClickListener(v -> {
-            bottomNavigation.setSelectedItemId(R.id.nav_history);
-        });
-
-        btnQuickSettings.setOnClickListener(v -> {
-            bottomNavigation.setSelectedItemId(R.id.nav_settings);
-        });
     }
 
-    // LOCAL EMERGENCY HISTORY TIMELINE
-    private void setupHistoryPanel() {
-        rvHistory.setLayoutManager(new LinearLayoutManager(this));
-        
-        // Pass repository to adapter so it can run details loading
-        EmergencyRepository repo = new EmergencyRepository(this);
-        historyAdapter = new HistoryAdapter(repo);
-        rvHistory.setAdapter(historyAdapter);
-
-        // Observe emergency logs
-        viewModel.getAllSessions().observe(this, sessions -> {
-            if (sessions != null) {
-                historyAdapter.setSessions(sessions);
-            }
-        });
-    }
 
     // CONFIGURATION PANEL SETUP
     private void setupSettingsPanel() {
-        // Profile fields
-        // Profile fields
         if (etUserNameSetting != null) {
             etUserNameSetting.setText(sessionManager.getUserName());
             etUserNameSetting.addTextChangedListener(new SimpleTextWatcher() {
@@ -364,98 +243,6 @@ public class MainActivity extends AppCompatActivity implements EmergencyService.
                 public void afterTextChanged(Editable s) {
                     sessionManager.saveUserName(s.toString().trim());
                 }
-            });
-        }
-
-        if (etMessageSetting != null) {
-            etMessageSetting.setText(sessionManager.getCustomMessage());
-            etMessageSetting.addTextChangedListener(new SimpleTextWatcher() {
-                @Override
-                public void afterTextChanged(Editable s) {
-                    sessionManager.saveCustomMessage(s.toString().trim());
-                }
-            });
-        }
-
-        if (etSmsInterval != null) {
-            etSmsInterval.setText(String.valueOf(sessionManager.getSmsIntervalSeconds()));
-            etSmsInterval.addTextChangedListener(new SimpleTextWatcher() {
-                @Override
-                public void afterTextChanged(Editable s) {
-                    try {
-                        int val = Integer.parseInt(s.toString().trim());
-                        if (val > 5) {
-                            sessionManager.saveSmsIntervalSeconds(val);
-                        }
-                    } catch (NumberFormatException ignored) {}
-                }
-            });
-        }
-
-        // Activation Checkboxes
-        if (cbPowerTriple != null) {
-            cbPowerTriple.setChecked(sessionManager.isTriggerPowerTriple());
-            cbPowerTriple.setOnCheckedChangeListener((bView, checked) -> {
-                sessionManager.setTriggerPowerTriple(checked);
-                syncServiceSettings();
-            });
-        }
-
-        if (cbLongPress != null) {
-            cbLongPress.setChecked(sessionManager.isTriggerLongPress());
-            cbLongPress.setOnCheckedChangeListener((bView, checked) -> {
-                sessionManager.setTriggerLongPress(checked);
-            });
-        }
-
-        if (cbVolumeCombo != null) {
-            cbVolumeCombo.setChecked(sessionManager.isTriggerVolumeCombo());
-            cbVolumeCombo.setOnCheckedChangeListener((bView, checked) -> {
-                sessionManager.setTriggerVolumeCombo(checked);
-                syncServiceSettings();
-            });
-        }
-
-        if (cbShakeTrigger != null) {
-            cbShakeTrigger.setChecked(sessionManager.isTriggerShake());
-            cbShakeTrigger.setOnCheckedChangeListener((bView, checked) -> {
-                sessionManager.setTriggerShake(checked);
-                syncServiceSettings();
-            });
-        }
-
-        if (cbVoiceTrigger != null) {
-            cbVoiceTrigger.setChecked(sessionManager.isTriggerVoice());
-            cbVoiceTrigger.setOnCheckedChangeListener((bView, checked) -> {
-                sessionManager.setTriggerVoice(checked);
-                syncServiceSettings();
-            });
-        }
-
-        // Siren and Flash Options
-        if (cbSiren != null) {
-            cbSiren.setChecked(sessionManager.isSirenEnabled());
-            cbSiren.setOnCheckedChangeListener((bView, checked) -> {
-                sessionManager.setSirenEnabled(checked);
-            });
-        }
-
-        if (cbFlashlight != null) {
-            cbFlashlight.setChecked(sessionManager.isFlashlightEnabled());
-            cbFlashlight.setOnCheckedChangeListener((bView, checked) -> {
-                sessionManager.setFlashlightEnabled(checked);
-            });
-        }
-
-        // Loud/Silent selection
-        if (rgAlertVolume != null) {
-            if (sessionManager.isLoudMode()) {
-                rgAlertVolume.check(R.id.rbLoud);
-            } else {
-                rgAlertVolume.check(R.id.rbSilent);
-            }
-            rgAlertVolume.setOnCheckedChangeListener((group, checkedId) -> {
-                sessionManager.setLoudMode(checkedId == R.id.rbLoud);
             });
         }
 
@@ -470,15 +257,13 @@ public class MainActivity extends AppCompatActivity implements EmergencyService.
                         if (etNewContactName != null) etNewContactName.setText("");
                         if (etNewContactPhone != null) etNewContactPhone.setText("");
                         if (etNewContactPriority != null) etNewContactPriority.setText("");
-                        if (btnAddContact != null) btnAddContact.setIcon(ContextCompat.getDrawable(this, R.drawable.ic_add));
-                    }
+                                            }
                 },
                 contact -> {
                     editingContactId = contact.getId();
                     if (etNewContactName != null) etNewContactName.setText(contact.getName());
                     if (etNewContactPhone != null) etNewContactPhone.setText(contact.getPhoneNumber());
                     if (etNewContactPriority != null) etNewContactPriority.setText(String.valueOf(contact.getPriority()));
-                    if (btnAddContact != null) btnAddContact.setIcon(ContextCompat.getDrawable(this, R.drawable.ic_shield));
                     Toast.makeText(this, "Editing contact: " + contact.getName(), Toast.LENGTH_SHORT).show();
                 }
             );
@@ -506,10 +291,10 @@ public class MainActivity extends AppCompatActivity implements EmergencyService.
 
                 if (primary != null) {
                     currentPrimaryContact = primary;
-                    tvPrimaryContactDisplay.setText("Primary Contact:\n" + primary.getName() + "\n\nPhone:\n" + primary.getPhoneNumber());
+                    tvPrimaryContactDisplay.setText(getString(R.string.name)+":\n"+primary.getName() + "\n\n"+getString(R.string.phone)+":\n" + primary.getPhoneNumber());
                 } else {
                     currentPrimaryContact = null;
-                    tvPrimaryContactDisplay.setText("Primary Contact:\nNone Configured\n\nPhone:\nN/A");
+                    tvPrimaryContactDisplay.setText(getString(R.string.name)+":\n "+"None Configured\n\n"+getString(R.string.phone)+":\nN/A");
                 }
                 
                 // Pre-populate priority hint if adding new contact
@@ -525,113 +310,10 @@ public class MainActivity extends AppCompatActivity implements EmergencyService.
             }
         });
 
-        // Add / Update contact action
-        btnAddContact.setOnClickListener(v -> {
-            String name = etNewContactName.getText().toString().trim();
-            String phone = etNewContactPhone.getText().toString().trim();
-            String priStr = etNewContactPriority.getText().toString().trim();
-
-            if (name.isEmpty() || phone.isEmpty()) {
-                Toast.makeText(this, "Please enter name and phone number", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            int priority = 1;
-            if (!priStr.isEmpty()) {
-                try {
-                    priority = Integer.parseInt(priStr);
-                } catch (NumberFormatException ignored) {}
-            }
-
-            if (editingContactId != -1) {
-                Contact contact = new Contact(name, phone, priority);
-                contact.setId(editingContactId);
-                viewModel.updateContact(contact);
-                editingContactId = -1;
-                btnAddContact.setIcon(ContextCompat.getDrawable(this, R.drawable.ic_add));
-                Toast.makeText(this, "Contact updated successfully", Toast.LENGTH_SHORT).show();
-            } else {
-                Contact contact = new Contact(name, phone, priority);
-                viewModel.insertContact(contact);
-                Toast.makeText(this, "Contact added successfully", Toast.LENGTH_SHORT).show();
-            }
-
-            etNewContactName.setText("");
-            etNewContactPhone.setText("");
-            etNewContactPriority.setText("");
-        });
-
-        // Import Contact Action
-        btnImportContact.setOnClickListener(v -> {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_CONTACTS}, 101);
-            } else {
-                pickContact();
-            }
-        });
-
-        // About SOS Alerter button click listener
-        View cardAboutApp = findViewById(R.id.cardAboutApp);
-        if (cardAboutApp != null) {
-            cardAboutApp.setOnClickListener(v -> {
-                Intent intent = new Intent(MainActivity.this, AboutActivity.class);
-                startActivity(intent);
-            });
-        }
-
-        // Cloud Integration (Optional) Card
-        View cardCloudIntegration = findViewById(R.id.cardCloudIntegration);
-        if (cardCloudIntegration != null) {
-            cardCloudIntegration.setOnClickListener(v -> showCloudSyncComingSoonDialog());
-        }
-
         // Emergency Calling controls setup
         MaterialSwitch cbEnableCalling = findViewById(R.id.cbEnableCalling);
-        Spinner spCallingContact = findViewById(R.id.spCallingContact);
-        Spinner spCallingDelay = findViewById(R.id.spCallingDelay);
 
-        if (cbEnableCalling != null && spCallingContact != null && spCallingDelay != null) {
             cbEnableCalling.setChecked(sessionManager.isEmergencyCallingEnabled());
-            cbEnableCalling.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                if (isChecked) {
-                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-                        cbEnableCalling.setChecked(false);
-                        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CALL_PHONE}, 102);
-                    } else {
-                        sessionManager.setEmergencyCallingEnabled(true);
-                    }
-                } else {
-                    sessionManager.setEmergencyCallingEnabled(false);
-                }
-            });
-
-            // Populate Call Delay Spinner
-            String[] delays = {"5 Seconds", "10 Seconds", "15 Seconds", "30 Seconds"};
-            ArrayAdapter<String> delayAdapter = new ArrayAdapter<>(this,
-                    android.R.layout.simple_spinner_item, delays);
-            delayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            spCallingDelay.setAdapter(delayAdapter);
-
-            int savedDelay = sessionManager.getEmergencyCallDelay();
-            if (savedDelay == 5) spCallingDelay.setSelection(0);
-            else if (savedDelay == 10) spCallingDelay.setSelection(1);
-            else if (savedDelay == 15) spCallingDelay.setSelection(2);
-            else if (savedDelay == 30) spCallingDelay.setSelection(3);
-
-            spCallingDelay.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    int delay = 10;
-                    if (position == 0) delay = 5;
-                    else if (position == 1) delay = 10;
-                    else if (position == 2) delay = 15;
-                    else if (position == 3) delay = 30;
-                    sessionManager.setEmergencyCallDelay(delay);
-                }
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {}
-            });
-
             // Populate spCallingContact dynamically from live contacts list
             viewModel.getAllContacts().observe(this, contacts -> {
                 if (contacts != null) {
@@ -642,100 +324,23 @@ public class MainActivity extends AppCompatActivity implements EmergencyService.
 
                     if (contactNames.isEmpty()) {
                         contactNames.add("No Contacts Available");
-                        spCallingContact.setEnabled(false);
                         cbEnableCalling.setEnabled(false);
                         cbEnableCalling.setChecked(false);
-                        sessionManager.setEmergencyCallingEnabled(false);
                     } else {
-                        spCallingContact.setEnabled(true);
                         cbEnableCalling.setEnabled(true);
                     }
 
                     ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                             android.R.layout.simple_spinner_item, contactNames);
                     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                    spCallingContact.setAdapter(adapter);
 
                     String savedPhone = sessionManager.getEmergencyCallPhone();
-                    if (savedPhone != null && !savedPhone.isEmpty()) {
-                        for (int i = 0; i < contacts.size(); i++) {
-                            if (contacts.get(i).getPhoneNumber().equals(savedPhone)) {
-                                spCallingContact.setSelection(i);
-                                break;
-                            }
-                        }
-                    } else if (!contacts.isEmpty()) {
+                    if (!contacts.isEmpty()) {
                         sessionManager.setEmergencyCallPhone(contacts.get(0).getPhoneNumber());
-                        spCallingContact.setSelection(0);
                     }
                 }
             });
 
-            spCallingContact.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    List<Contact> currentContacts = viewModel.getAllContacts().getValue();
-                    if (currentContacts != null && position < currentContacts.size()) {
-                        Contact selected = currentContacts.get(position);
-                        sessionManager.setEmergencyCallPhone(selected.getPhoneNumber());
-                    }
-                }
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {}
-            });
-        }
-    }
-
-    private void showCloudSyncComingSoonDialog() {
-        if (isFinishing() || isDestroyed()) return;
-        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
-                .setTitle("Cloud Sync")
-                .setMessage("This feature is currently under development.\n\n" +
-                        "Future Features:\n" +
-                        "• Backup & Restore\n" +
-                        "• Multi-device Sync\n" +
-                        "• Emergency History Sync\n" +
-                        "• Secure Media Backup")
-                .setPositiveButton("OK", null)
-                .show();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        updateGpsStatus();
-        
-        MaterialSwitch cbEnableCalling = findViewById(R.id.cbEnableCalling);
-        if (cbEnableCalling != null) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-                cbEnableCalling.setChecked(false);
-                sessionManager.setEmergencyCallingEnabled(false);
-            } else {
-                cbEnableCalling.setChecked(sessionManager.isEmergencyCallingEnabled());
-            }
-        }
-        syncServiceSettings();
-    }
-
-    private void updateGpsStatus() {
-        if (tvGpsStatus == null) return;
-        boolean hasPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
-        LocationManager lm = (LocationManager) getSystemService(LOCATION_SERVICE);
-        boolean gpsEnabled = false;
-        try {
-            gpsEnabled = lm != null && lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
-        } catch (Exception ignored) {}
-
-        if (!hasPermission) {
-            tvGpsStatus.setText("Current GPS Status: Permission Denied");
-            tvGpsStatus.setTextColor(ContextCompat.getColor(this, R.color.panic_red));
-        } else if (!gpsEnabled) {
-            tvGpsStatus.setText("Current GPS Status: GPS Disabled");
-            tvGpsStatus.setTextColor(ContextCompat.getColor(this, R.color.panic_red));
-        } else {
-            tvGpsStatus.setText("Current GPS Status: Active (High Accuracy)");
-            tvGpsStatus.setTextColor(ContextCompat.getColor(this, R.color.accent_green));
-        }
     }
 
     private void pickContact() {
@@ -771,155 +376,9 @@ public class MainActivity extends AppCompatActivity implements EmergencyService.
         }
     }
 
-    private void syncServiceSettings() {
-        if (isBound) {
-            emergencyService.syncServiceState();
-        }
-    }
-
-    // EMERGENCY SERVICE EVENT LISTENERS
-
-    @Override
-    public void onCountdownTick(int secondsRemaining) {
-        runOnUiThread(() -> {
-            tvTimer.setText(String.valueOf(secondsRemaining));
-            panicProgress.setProgress((10 - secondsRemaining) * 10);
-        });
-    }
-
-    @Override
-    public void onEmergencyStateChanged(boolean isActive, boolean isCountdownCompleted) {
-        runOnUiThread(() -> {
-            if (isActive) {
-                tvStatus.setText(isCountdownCompleted ? "ACTIVE EMERGENCY TRACKING" : "EMERGENCY PROTOCOL STARTED");
-                tvStatus.setTextColor(ContextCompat.getColor(this, R.color.panic_red));
-                btnCancel.setVisibility(isCountdownCompleted ? View.GONE : View.VISIBLE);
-                btnSafe.setVisibility(isCountdownCompleted ? View.VISIBLE : View.GONE);
-                
-                tvTimer.setVisibility(isCountdownCompleted ? View.GONE : View.VISIBLE);
-                panicProgress.setVisibility(isCountdownCompleted ? View.GONE : View.VISIBLE);
-                cardActiveTracking.setVisibility(isCountdownCompleted ? View.VISIBLE : View.GONE);
-                
-                tvPanicTitle.setText("SOS");
-                tvPanicSubtitle.setText(isCountdownCompleted ? "Tracking Active" : "Starting...");
-
-                // Start ripple animations on the panic button during countdown
-                if (!isCountdownCompleted) {
-                    startRippleAnimation();
-                } else {
-                    stopRippleAnimation();
-                }
-            } else {
-                tvStatus.setText("System Protected");
-                tvStatus.setTextColor(ContextCompat.getColor(this, R.color.accent_green));
-                
-                btnCancel.setVisibility(View.GONE);
-                btnSafe.setVisibility(View.GONE);
-                tvTimer.setVisibility(View.GONE);
-                panicProgress.setVisibility(View.GONE);
-                cardActiveTracking.setVisibility(View.GONE);
-                
-                tvPanicTitle.setText("SOS");
-                tvPanicSubtitle.setText("Tap to Trigger");
-                stopRippleAnimation();
-            }
-        });
-    }
-
-    @Override
-    public void onMonitoringStateChanged(boolean isMonitoring) {
-        // Monitoring status callback
-    }
-
-    // ANIMATIONS
-    private void startRippleAnimation() {
-        AlphaAnimation anim = new AlphaAnimation(0.2f, 0.9f);
-        anim.setDuration(600);
-        anim.setRepeatMode(Animation.REVERSE);
-        anim.setRepeatCount(Animation.INFINITE);
-        panicRipple.startAnimation(anim);
-        panicRipple.setVisibility(View.VISIBLE);
-    }
-
-    private void stopRippleAnimation() {
-        panicRipple.clearAnimation();
-        panicRipple.setVisibility(View.INVISIBLE);
-    }
-
-    // RUNTIME PERMISSIONS
-
-    private void checkAndRequestPermissions() {
-        List<String> listPermissionsNeeded = new ArrayList<>();
-        listPermissionsNeeded.add(Manifest.permission.SEND_SMS);
-        listPermissionsNeeded.add(Manifest.permission.RECORD_AUDIO);
-        listPermissionsNeeded.add(Manifest.permission.CAMERA);
-        listPermissionsNeeded.add(Manifest.permission.ACCESS_FINE_LOCATION);
-        listPermissionsNeeded.add(Manifest.permission.ACCESS_COARSE_LOCATION);
-        
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            listPermissionsNeeded.add(Manifest.permission.POST_NOTIFICATIONS);
-        }
-
-        List<String> listPermissionsToRequest = new ArrayList<>();
-        for (String perm : listPermissionsNeeded) {
-            if (ContextCompat.checkSelfPermission(this, perm) != PackageManager.PERMISSION_GRANTED) {
-                listPermissionsToRequest.add(perm);
-            }
-        }
-
-        if (!listPermissionsToRequest.isEmpty()) {
-            ActivityCompat.requestPermissions(this, listPermissionsToRequest.toArray(new String[0]), PERMISSIONS_REQUEST_CODE);
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == PERMISSIONS_REQUEST_CODE) {
-            boolean someDenied = false;
-            for (int result : grantResults) {
-                if (result == PackageManager.PERMISSION_DENIED) {
-                    someDenied = true;
-                    break;
-                }
-            }
-            if (someDenied) {
-                Toast.makeText(this, "Permissions are required for complete safety activation!", Toast.LENGTH_LONG).show();
-            } else {
-                Toast.makeText(this, "System protected. Setup completed.", Toast.LENGTH_SHORT).show();
-                syncServiceSettings();
-            }
-        } else if (requestCode == 101) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                pickContact();
-            } else {
-                Toast.makeText(this, "Read contacts permission denied", Toast.LENGTH_SHORT).show();
-            }
-        } else if (requestCode == 102) {
-            MaterialSwitch cbEnableCalling = findViewById(R.id.cbEnableCalling);
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                sessionManager.setEmergencyCallingEnabled(true);
-                if (cbEnableCalling != null) cbEnableCalling.setChecked(true);
-                Toast.makeText(this, "Emergency Calling enabled", Toast.LENGTH_SHORT).show();
-            } else {
-                sessionManager.setEmergencyCallingEnabled(false);
-                if (cbEnableCalling != null) cbEnableCalling.setChecked(false);
-                Toast.makeText(this, "Call Phone permission denied. Calling disabled.", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (isBound) {
-            emergencyService.setListener(null);
-            unbindService(serviceConnection);
-            isBound = false;
-        }
-        if (historyAdapter != null) {
-            historyAdapter.releaseMediaPlayer();
-        }
     }
 
     private static abstract class SimpleTextWatcher implements TextWatcher {

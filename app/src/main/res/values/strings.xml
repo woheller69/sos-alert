@@ -1,8 +1,12 @@
 <resources>
-    <string name="app_name">SOS Alerter</string>
-    <string name="panic_text">PANIC</string>
-    <string name="cancel_text">CANCEL</string>
-    <string name="status_ready">System Ready</string>
-    <string name="status_triggered">EMERGENCY TRIGGERED!</string>
-    <string name="emergency_msg">EMERGENCY! I need help. My location: </string>
+    <string name="app_name">SOS ALERT</string>
+    <string name="primary_emergency_contact">Emergency Contact</string>
+    <string name="emergency_phone_number">Emergency Phone Number</string>
+    <string name="primary_contact_name_e_g_mom">Primary Contact Name (e.g. Mom)</string>
+    <string name="your_name">Your Name</string>
+    <string name="configure_local_emergency_information">Configure local emergency information</string>
+    <string name="first_time_setup">First-Time Setup</string>
+    <string name="complete_setup">Complete Setup</string>
+    <string name="phone">Phone</string>
+    <string name="name">Name</string>
 </resources>

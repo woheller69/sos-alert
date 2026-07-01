@@ -37,18 +37,11 @@ public class LandingActivity extends AppCompatActivity {
         setContentView(R.layout.activity_landing);
 
         MaterialButton btnContinue = findViewById(R.id.btnContinue);
-        MaterialButton btnAboutProject = findViewById(R.id.btnAboutProject);
 
         if (btnContinue != null) {
             btnContinue.setOnClickListener(v -> showPermissionExplanationDialog());
         }
 
-        if (btnAboutProject != null) {
-            btnAboutProject.setOnClickListener(v -> {
-                Intent intent = new Intent(LandingActivity.this, AboutActivity.class);
-                startActivity(intent);
-            });
-        }
     }
 
     private void showPermissionExplanationDialog() {
@@ -73,13 +66,7 @@ public class LandingActivity extends AppCompatActivity {
 
     private void requestCorePermissions() {
         List<String> permissions = new ArrayList<>();
-        permissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
-        permissions.add(Manifest.permission.ACCESS_COARSE_LOCATION);
-        permissions.add(Manifest.permission.SEND_SMS);
         permissions.add(Manifest.permission.CALL_PHONE);
-        permissions.add(Manifest.permission.RECORD_AUDIO);
-        permissions.add(Manifest.permission.CAMERA);
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             permissions.add(Manifest.permission.POST_NOTIFICATIONS);
         }
