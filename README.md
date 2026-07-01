@@ -14,4 +14,5 @@
 ## 📄 License
 
 This project is licensed under the **GNU GPL-3.0 License**. See the [LICENSE](LICENSE) file for details.
+
 It is based on https://github.com/dhilipmpms/SOS-alerter
