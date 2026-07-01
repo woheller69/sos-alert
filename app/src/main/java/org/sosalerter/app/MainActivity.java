@@ -1,6 +1,6 @@
 package org.sosalerter.app;
 
-import android.Manifest;
+
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -14,19 +14,17 @@ import com.google.android.material.materialswitch.MaterialSwitch;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ProgressBar;
-import android.widget.RadioGroup;
+
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
+
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.sosalerter.app.data.db.entity.Contact;
-import org.sosalerter.app.data.repository.EmergencyRepository;
 import org.sosalerter.app.ui.ContactsAdapter;
 import org.sosalerter.app.ui.MainViewModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -115,7 +113,6 @@ public class MainActivity extends AppCompatActivity {
         panicRipple = findViewById(R.id.panic_ripple);
         tvPanicTitle = findViewById(R.id.tvPanicTitle);
         tvPanicSubtitle = findViewById(R.id.tvPanicSubtitle);
-        tvTimer = findViewById(R.id.tvTimer);
         panicProgress = findViewById(R.id.panic_progress);
         cardActiveTracking = findViewById(R.id.cardActiveTracking);
 

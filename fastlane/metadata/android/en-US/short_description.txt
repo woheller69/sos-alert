@@ -1,1 +1,1 @@
-Privacy-focused emergency app with SMS location tracking and silent recording.
+Auto-dial your emergency contact

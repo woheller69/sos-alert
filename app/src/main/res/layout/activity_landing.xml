@@ -21,35 +21,36 @@
             android:padding="24dp"
             android:gravity="center_horizontal">
 
-            <ImageView
-                android:id="@+id/ivLogo"
-                android:layout_width="96dp"
-                android:layout_height="96dp"
-                android:layout_marginTop="28dp"
-                android:src="@drawable/ic_guardian"
-                app:tint="@color/panic_red" />
+            <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:id="@+id/ivSetupLogo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:background="#33000000">
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="SOS"
+                    android:textSize="72sp"
+                    android:textColor="#FFFFFF"
+                    android:backgroundTint="#D32F2F"
+                    android:padding="40dp"
+                    android:fontFamily="sans-serif-medium" />
+            </LinearLayout>
+
 
             <TextView
                 android:id="@+id/tvWelcomeTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
-                android:text="Welcome to SOS Alerter"
+                android:text="@string/welcome_to_sos_alert"
                 android:textColor="@color/text_primary"
                 android:textSize="26sp"
                 android:textStyle="bold"
-                android:gravity="center" />
-
-            <TextView
-                android:id="@+id/tvWelcomeMotto"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:text="Protect. Alert. Respond."
-                android:textColor="@color/accent_green"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                android:letterSpacing="0.12"
                 android:gravity="center" />
 
             <!-- Core Features Card -->

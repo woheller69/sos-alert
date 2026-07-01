@@ -9,4 +9,6 @@
     <string name="complete_setup">Complete Setup</string>
     <string name="phone">Phone</string>
     <string name="name">Name</string>
+    <string name="tap_to_trigger">Tap to Trigger</string>
+    <string name="welcome_to_sos_alert">Welcome to SOS Alert</string>
 </resources>

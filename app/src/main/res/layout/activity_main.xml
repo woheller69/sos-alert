@@ -102,7 +102,7 @@
                                 android:id="@+id/tvPanicSubtitle"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Tap to Trigger"
+                                android:text="@string/tap_to_trigger"
                                 android:textColor="#E0FFFFFF"
                                 android:textSize="13sp"
                                 android:layout_marginTop="4dp" />
@@ -121,19 +121,6 @@
                         android:progressDrawable="@drawable/circular_progress"
                         android:visibility="invisible" />
                 </FrameLayout>
-
-                <TextView
-                    android:id="@+id/tvTimer"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="10"
-                    android:textColor="@color/panic_red"
-                    android:textSize="64sp"
-                    android:textStyle="bold"
-                    android:visibility="invisible" />
-
-                <!-- Action Buttons -->
 
                 <!-- Active Tracking Card -->
                 <com.google.android.material.card.MaterialCardView

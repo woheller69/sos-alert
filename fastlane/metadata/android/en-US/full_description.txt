@@ -1,9 +1,5 @@
-SOS Alerter is a modern, privacy-focused emergency assistance application designed to keep you safe when it matters most. It operates entirely offline, storing all user credentials, contacts, and captured media locally on your device.
+SOS Alert is a privacy focused emergency app
 
 Key Features:
-* Emergency SMS & Call Alerts: Instantly send custom emergency SMS messages with high-accuracy GPS coordinates and auto-dial your designated contact or emergency services.
-* Continuous GPS Tracking: Keep contacts updated with periodic location sharing.
-* Discreet Evidence Gathering: Silently capture photos using front and back cameras, and record ambient audio during an active emergency.
-* Versatile Activation Triggers: Trigger an alert via a triple-press of the power button, shaking the device, voice commands ("Help Me"), or a long press on the main screen button.
-* Loud Siren & Strobe: Activate a loud siren and strobe light to grab nearby attention.
+* Emergency Call Alerts: Instantly auto-dial your primary emergency contact or emergency service.
 * No Trackers or Ads: Free and open-source under GPLv3, with absolutely no telemetry, analytics, or third-party connections.
